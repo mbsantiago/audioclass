@@ -1,0 +1,62 @@
+[project]
+name = "birdnetsnd"
+version = "0.1.0"
+description = "A soundevent compatible BirdNET model"
+authors = [
+    { name = "Santiago Martinez Balvanera", email = "santiago.mbal@gmail.com" },
+]
+dependencies = [
+    "pandas>=2.2.2",
+    "birdnetlib>=0.17.2",
+    "xarray>=2024.5.0",
+    "tensorflow>=2.16.1",
+    "netcdf4>=1.6.5",
+    "tflite>=2.10.0",
+    "tflite-runtime>=2.14.0",
+    "soundevent[audio,array]>=2.0.0",
+]
+readme = "README.md"
+requires-python = ">= 3.8"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/birdnetsnd"]
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "pytest>=8.2.1",
+    "coverage>=7.5.3",
+    "pytest-coverage>=0.0",
+    "pytest-mock>=3.14.0",
+]
+
+[tool.ruff]
+line-length = 79
+target-version = "py38"
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = 79
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "B", "Q", "I"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+verboseOutput = true
+
+[tool.coverage.run]
+branch = true
+source = ["src/birdnetsnd"]
+command_line = "-m pytest"

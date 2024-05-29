@@ -7,20 +7,22 @@ authors = [
 ]
 dependencies = [
     "pandas>=2.2.2",
-    "birdnetlib>=0.17.2",
-    "xarray>=2024.5.0",
-    "tensorflow>=2.16.1",
     "netcdf4>=1.6.5",
-    "tflite>=2.10.0",
-    "tflite-runtime>=2.14.0",
     "soundevent[audio,array]>=2.0.0",
     "tqdm>=4.66.4",
     "pyarrow>=16.1.0",
     "requests>=2.32.2",
-    "tensorflow-hub>=0.16.1",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
+license = { text = "MIT" }
+
+[project.optional-dependencies]
+tensorflow = ["tensorflow>=2.16.1", "tensorflow-hub>=0.16.1"]
+tflite = ["tflite>=2.10.0", "tflite-runtime>=2.14.0"]
+birdnet = ["audioclass[tflite]"]
+perch = ["audioclass[tensorflow]"]
+all = ["audioclass[birdnet]", "audioclass[perch]"]
 
 [build-system]
 requires = ["hatchling"]

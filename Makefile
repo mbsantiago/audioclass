@@ -1,6 +1,6 @@
 .ONESHELL:
 ENV_PREFIX=.venv/bin/
-PROJECT_NAME=src/birdnetsnd
+PROJECT_NAME=src/audioclass
 
 .PHONY: help
 help:             ## Show the help.
@@ -26,7 +26,7 @@ fmt:              ## Format code using black & isort.
 	$(ENV_PREFIX)ruff format $(PROJECT_NAME)/
 	$(ENV_PREFIX)ruff format tests/
 
-.PHONY: lint-mypy
+.PHONY: lint-pyright
 lint-pyright:
 	$(ENV_PREFIX)pyright $(PROJECT_NAME)/
 
@@ -36,7 +36,7 @@ lint-ruff:
 	$(ENV_PREFIX)ruff check tests/
 
 .PHONY: lint
-lint: lint-mypy lint-ruff
+lint: lint-pyright lint-ruff
 
 .PHONY: test-watch
 test-watch:    ## Run tests and generate coverage report.
@@ -48,7 +48,7 @@ test:    ## Run tests and generate coverage report.
 
 .PHONY: coverage
 coverage:    ## Run tests and generate coverage report.
-	$(ENV_PREFIX)coverage run -m pytest tests/
+	$(ENV_PREFIX)coverage run -m pytest tests/ --runslow
 
 .PHONY: coverage-report
 coverage-report: coverage

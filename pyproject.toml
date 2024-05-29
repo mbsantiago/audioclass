@@ -16,6 +16,8 @@ dependencies = [
     "soundevent[audio,array]>=2.0.0",
     "tqdm>=4.66.4",
     "pyarrow>=16.1.0",
+    "requests>=2.32.2",
+    "tensorflow-hub>=0.16.1",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
@@ -37,6 +39,8 @@ dev-dependencies = [
     "coverage>=7.5.3",
     "pytest-coverage>=0.0",
     "pytest-mock>=3.14.0",
+    "ruff>=0.4.6",
+    "pyright>=1.1.365",
 ]
 
 [tool.ruff]
@@ -56,7 +60,7 @@ convention = "numpy"
 [tool.pyright]
 venvPath = "."
 venv = ".venv"
-verboseOutput = true
+exclude = [".venv"]
 
 [tool.coverage.run]
 branch = true

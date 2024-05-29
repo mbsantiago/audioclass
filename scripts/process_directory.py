@@ -3,13 +3,13 @@ from pathlib import Path
 from typing import List
 
 import pandas as pd
-from audioclass import BirdNET
+from audioclass.batch import BaseIterator, SimpleIterator
+from audioclass.batch.tensorflow import TFDatasetIterator
 from audioclass.constants import (
     BATCH_SIZE,
     DEFAULT_THRESHOLD,
-    LABELS_PATH,
-    MODEL_PATH,
 )
+from audioclass.models.birdnet import LABELS_PATH, MODEL_PATH, BirdNET
 from soundevent import data
 
 
@@ -17,9 +17,15 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--model",
-        type=Path,
+        type=str,
         default=MODEL_PATH,
         help="Path to the BirdNET model file",
+    )
+    parser.add_argument(
+        "--iterator-type",
+        choices=["simple", "tensorflow"],
+        default="simple",
+        help="Type of batch iterator to use",
     )
     parser.add_argument(
         "--directory",
@@ -46,7 +52,7 @@ def parse_args():
     )
     parser.add_argument(
         "--labels",
-        type=Path,
+        type=str,
         default=LABELS_PATH,
         help="Path to the BirdNET labels file",
     )
@@ -115,22 +121,51 @@ def save_features(
     pd.DataFrame(data).to_parquet(dest, index=False)
 
 
+def load_iterator(
+    iterator_type: str,
+    directory: Path,
+    samplerate: int,
+    input_samples: int,
+    batch_size: int,
+) -> BaseIterator:
+    if iterator_type == "simple":
+        return SimpleIterator.from_directory(
+            directory=directory,
+            samplerate=samplerate,
+            input_samples=input_samples,
+            batch_size=batch_size,
+        )
+
+    if iterator_type == "tensorflow":
+        return TFDatasetIterator.from_directory(
+            directory=directory,
+            samplerate=samplerate,
+            input_samples=input_samples,
+            batch_size=batch_size,
+        )
+
+    raise ValueError(f"Invalid iterator type: {iterator_type}")
+
+
 def main():
     args = parse_args()
 
     if not args.output.exists():
         args.output.mkdir(parents=True)
 
-    model = BirdNET.from_model_file(
+    model = BirdNET.load(
         model_path=args.model,
         labels_path=args.labels,
         confidence_threshold=args.threshold,
     )
-    outputs = model.process_directory(
+    iterator = load_iterator(
+        iterator_type=args.iterator_type,
         directory=args.directory,
-        recursive=args.recursive,
+        samplerate=model.samplerate,
+        input_samples=model.input_samples,
         batch_size=args.batch_size,
     )
+    outputs = model.process_iterable(iterator)  # type: ignore
     save_features(outputs, dest=args.output / args.feature_file)
     save_predictions(outputs, dest=args.output / args.prediction_file)
 

@@ -25,6 +25,7 @@ def test_probability_arrays_have_additional_coords():
     result = convert_to_probabilities_array(
         class_probs,
         labels,
+        hop_size=1.0,
         latitude=0.0,
         longitude=0.0,
         recorded_on=datetime.datetime.now(),
@@ -39,6 +40,7 @@ def test_feature_arrays_have_additional_coords():
     features = np.array([[0.5, 0.5]])
     result = convert_to_features_array(
         features,
+        hop_size=1.0,
         latitude=0.0,
         longitude=0.0,
         recorded_on=datetime.datetime.now(),

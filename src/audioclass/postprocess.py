@@ -5,7 +5,7 @@ import numpy as np
 import xarray as xr
 from soundevent import data
 
-from audioclass.constants import DEFAULT_THRESHOLD, HOP_SIZE
+from audioclass.constants import DEFAULT_THRESHOLD
 
 __all__ = [
     "convert_to_dataset",
@@ -18,7 +18,7 @@ __all__ = [
 
 def convert_to_features_list(
     features: np.ndarray,
-    prefix: str = "birdnet_",
+    prefix: str,
 ) -> List[List[data.Feature]]:
     return [
         [
@@ -52,8 +52,8 @@ def convert_to_predicted_tags_list(
 def convert_to_probabilities_array(
     class_probs: np.ndarray,
     labels: List[str],
+    hop_size: float,
     start_time: float = 0,
-    hop_size: float = HOP_SIZE,
     latitude: Optional[float] = None,
     longitude: Optional[float] = None,
     recorded_on: Optional[datetime.datetime] = None,
@@ -86,8 +86,8 @@ def convert_to_probabilities_array(
 
 def convert_to_features_array(
     features: np.ndarray,
+    hop_size: float,
     start_time: float = 0,
-    hop_size: float = HOP_SIZE,
     latitude: Optional[float] = None,
     longitude: Optional[float] = None,
     recorded_on: Optional[datetime.datetime] = None,
@@ -119,8 +119,8 @@ def convert_to_dataset(
     features: np.ndarray,
     class_probs: np.ndarray,
     labels: List[str],
+    hop_size: float,
     start_time: float = 0,
-    hop_size: float = HOP_SIZE,
     latitude: Optional[float] = None,
     longitude: Optional[float] = None,
     recorded_on: Optional[datetime.datetime] = None,

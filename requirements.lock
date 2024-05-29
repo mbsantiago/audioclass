@@ -93,6 +93,7 @@ numpy==1.24.4
     # via scipy
     # via tensorboard
     # via tensorflow
+    # via tensorflow-hub
     # via tflite
     # via tflite-runtime
     # via xarray
@@ -112,6 +113,7 @@ pillow==10.3.0
 protobuf==4.25.3
     # via tensorboard
     # via tensorflow
+    # via tensorflow-hub
 pyarrow==16.1.0
     # via audioclass
 pycparser==2.22
@@ -132,6 +134,7 @@ python-dateutil==2.9.0.post0
 pytz==2024.1
     # via pandas
 requests==2.32.2
+    # via audioclass
     # via birdnetlib
     # via tensorflow
 rich==13.7.1
@@ -157,10 +160,15 @@ tensorboard-data-server==0.7.2
     # via tensorboard
 tensorflow==2.16.1
     # via audioclass
+    # via tf-keras
+tensorflow-hub==0.16.1
+    # via audioclass
 tensorflow-io-gcs-filesystem==0.37.0
     # via tensorflow
 termcolor==2.4.0
     # via tensorflow
+tf-keras==2.16.0
+    # via tensorflow-hub
 tflite==2.10.0
     # via audioclass
 tflite-runtime==2.14.0

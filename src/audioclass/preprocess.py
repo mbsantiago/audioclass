@@ -5,8 +5,6 @@ import numpy as np
 import xarray as xr
 from soundevent import arrays, audio, data
 
-from audioclass.constants import INPUT_SAMPLES, SAMPLERATE
-
 __all__ = [
     "load_recording",
     "load_clip",
@@ -15,8 +13,8 @@ __all__ = [
 
 def load_recording(
     recording: data.Recording,
-    samplerate: int = SAMPLERATE,
-    buffer_size: int = INPUT_SAMPLES,
+    samplerate: int,
+    buffer_size: int,
     audio_dir: Optional[Path] = None,
 ) -> np.ndarray:
     wave = audio.load_recording(recording, audio_dir=audio_dir)
@@ -29,8 +27,8 @@ def load_recording(
 
 def load_clip(
     clip: data.Clip,
-    samplerate: int = SAMPLERATE,
-    buffer_size: int = INPUT_SAMPLES,
+    samplerate: int,
+    buffer_size: int,
     audio_dir: Optional[Path] = None,
 ) -> np.ndarray:
     wave = audio.load_clip(clip, audio_dir=audio_dir)
@@ -43,8 +41,8 @@ def load_clip(
 
 def preprocess_audio(
     wave: xr.DataArray,
-    samplerate: int = SAMPLERATE,
-    buffer_size: int = INPUT_SAMPLES,
+    samplerate: int,
+    buffer_size: int,
 ) -> np.ndarray:
     if "channel" in wave.dims:
         wave = wave.sel(channel=0)
@@ -55,7 +53,7 @@ def preprocess_audio(
 
 def resample_audio(
     wave: xr.DataArray,
-    samplerate: int = SAMPLERATE,
+    samplerate: int,
 ) -> xr.DataArray:
     step = arrays.get_dim_step(wave, "time")
     original_samplerate = int(1 / step)
@@ -67,7 +65,8 @@ def resample_audio(
 
 
 def stack_array(
-    arr: np.ndarray, buffer_size: int = INPUT_SAMPLES
+    arr: np.ndarray,
+    buffer_size: int,
 ) -> np.ndarray:
     if arr.ndim != 1:
         raise ValueError(

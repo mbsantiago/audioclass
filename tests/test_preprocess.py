@@ -65,14 +65,22 @@ def test_preprocess_resamples_if_necessary(random_wav_factory, mocker):
 def test_can_process_multi_channel_recording(random_wav_factory):
     path = random_wav_factory(duration=0.5, channels=2)
     recording = data.Recording.from_file(path)
-    arr = load_recording(recording)
+    arr = load_recording(
+        recording,
+        samplerate=48_000,
+        buffer_size=144_000,
+    )
     assert isinstance(arr, np.ndarray)
     assert arr.shape == (1, 144_000)
 
 
 def test_can_load_audio_from_file(random_wav_factory):
     path = random_wav_factory(duration=0.5)
-    arr = load_recording(data.Recording.from_file(path))
+    arr = load_recording(
+        data.Recording.from_file(path),
+        samplerate=48_000,
+        buffer_size=144_000,
+    )
     assert isinstance(arr, np.ndarray)
     assert arr.shape == (1, 144_000)
 
@@ -84,6 +92,6 @@ def test_can_load_clip(random_wav_factory):
         start_time=1,
         end_time=4,
     )
-    arr = load_clip(clip)
+    arr = load_clip(clip, samplerate=48_000, buffer_size=144_000)
     assert isinstance(arr, np.ndarray)
     assert arr.shape == (1, 144_000)

@@ -1,25 +1,32 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import Callable, List, Optional, Tuple
 
+import numpy as np
 import pandas as pd
 import tensorflow as tf
 from soundevent import audio, data
 from tensorflow import data as tfdata
+from tqdm import tqdm
 
-from birdnetsnd.constants import DEFAULT_THRESHOLD, INPUT_SAMPLES, SAMPLERATE
-from birdnetsnd.model import BirdNET
-from birdnetsnd.preprocess import load_recording
+from audioclass.constants import (
+    BATCH_SIZE,
+    DEFAULT_THRESHOLD,
+    INPUT_SAMPLES,
+    SAMPLERATE,
+)
+from audioclass.preprocess import load_recording
 
 __all__ = [
     "process_dataframe",
     "process_directory",
+    "process_recordings",
     "process_file_list",
 ]
 
 
 def files_dataset(
     files: list[Path],
-    batch_size: int = 32,
+    batch_size: int = BATCH_SIZE,
     samplerate: int = SAMPLERATE,
     input_samples: int = INPUT_SAMPLES,
     audio_dir: Optional[Path] = None,
@@ -43,7 +50,7 @@ def files_dataset(
         can be absolute or relative to the `audio_dir` if provided, or the
         current working directory otherwise.
     batch_size : int, optional
-        The number of audio samples to include in each batch. Default is 32.
+        The number of audio samples to include in each batch. Default is 4.
     samplerate : int, optional
         The desired sampling rate for the audio data (e.g., 44100 Hz). Default
         is 48000 Hz. Any audio files with a different sampling rate will be
@@ -114,9 +121,13 @@ def files_dataset(
 
 
 def process_recordings(
-    model: BirdNET,
+    process_array: Callable[[np.ndarray], Tuple[np.ndarray, np.ndarray]],
     recordings: List[data.Recording],
-    batch_size: int = 32,
+    tags: List[data.Tag],
+    samplerate: int = SAMPLERATE,
+    input_samples: int = INPUT_SAMPLES,
+    name: str = "BirdNET",
+    batch_size: int = BATCH_SIZE,
     audio_dir: Optional[Path] = None,
     confidence_threshold: float = DEFAULT_THRESHOLD,
 ) -> List[data.ClipPrediction]:
@@ -124,24 +135,29 @@ def process_recordings(
     dataset = files_dataset(
         files,
         batch_size=batch_size,
-        samplerate=model.samplerate,
-        input_samples=model.input_samples,
+        samplerate=samplerate,
+        input_samples=input_samples,
         audio_dir=audio_dir,
     )
-    hop_size = model.input_samples / model.samplerate
+    hop_size = input_samples / samplerate
 
     output = []
 
-    for array, (frame, index) in dataset.as_numpy_iterator():  # type: ignore
-        class_probs, features = model.process_array(array)
+    for array, (frame, index) in tqdm(dataset.as_numpy_iterator()):  # type: ignore
+        class_probs, features = process_array(array)
 
         for probs, feats, frm, idx in zip(
             class_probs,
             features,
-            frame,
-            index,
+            frame.flatten(),
+            index.flatten(),
         ):
-            recording = recordings[idx]
+            try:
+                recording = recordings[idx]
+
+            except TypeError as err:
+                raise ValueError(f"Invalid index: {idx}") from err
+
             clip = data.Clip(
                 recording=recording,
                 start_time=frm * hop_size,
@@ -151,12 +167,12 @@ def process_recordings(
                 data.ClipPrediction(
                     clip=clip,
                     features=[
-                        data.Feature(name=f"{model.name}_{i}", value=feat)
+                        data.Feature(name=f"{name}_{i}", value=feat)
                         for i, feat in enumerate(feats)
                     ],
                     tags=[
                         data.PredictedTag(tag=tag, score=score)
-                        for tag, score in zip(model.tags, probs)
+                        for tag, score in zip(tags, probs)
                         if score > confidence_threshold
                     ],
                 )
@@ -166,38 +182,63 @@ def process_recordings(
 
 
 def process_file_list(
-    model: BirdNET,
+    process_array: Callable[[np.ndarray], Tuple[np.ndarray, np.ndarray]],
     files: List[Path],
-    batch_size: int = 32,
-):
+    tags: List[data.Tag],
+    samplerate: int = SAMPLERATE,
+    input_samples: int = INPUT_SAMPLES,
+    confidence_threshold: float = DEFAULT_THRESHOLD,
+    name: str = "BirdNET",
+    batch_size: int = BATCH_SIZE,
+) -> List[data.ClipPrediction]:
     recordings = [
         data.Recording.from_file(file, compute_hash=False) for file in files
     ]
     return process_recordings(
-        model,
+        process_array,
         recordings,
+        tags,
+        samplerate=samplerate,
+        input_samples=input_samples,
+        name=name,
         batch_size=batch_size,
+        confidence_threshold=confidence_threshold,
     )
 
 
 def process_directory(
-    model: BirdNET,
+    process_array: Callable[[np.ndarray], Tuple[np.ndarray, np.ndarray]],
     directory: Path,
+    tags: List[data.Tag],
+    samplerate: int = SAMPLERATE,
+    input_samples: int = INPUT_SAMPLES,
+    confidence_threshold: float = DEFAULT_THRESHOLD,
+    name: str = "BirdNET",
     recursive: bool = True,
-    batch_size: int = 32,
+    batch_size: int = BATCH_SIZE,
 ):
     files = list(audio.get_audio_files(directory, recursive=recursive))
     return process_file_list(
-        model,
+        process_array,
         files,
+        tags,
+        samplerate=samplerate,
+        input_samples=input_samples,
+        name=name,
         batch_size=batch_size,
+        confidence_threshold=confidence_threshold,
     )
 
 
 def process_dataframe(
-    model: BirdNET,
+    process_array: Callable[[np.ndarray], Tuple[np.ndarray, np.ndarray]],
     df: pd.DataFrame,
-    batch_size: int = 32,
+    tags: List[data.Tag],
+    samplerate: int = SAMPLERATE,
+    input_samples: int = INPUT_SAMPLES,
+    confidence_threshold: float = DEFAULT_THRESHOLD,
+    name: str = "BirdNET",
+    batch_size: int = BATCH_SIZE,
     audio_dir: Optional[Path] = None,
     path_col: str = "path",
     latitude_col: Optional[str] = "latitude",
@@ -236,8 +277,13 @@ def process_dataframe(
         recordings.append(recording)
 
     return process_recordings(
-        model,
+        process_array,
         recordings,
+        tags,
+        samplerate=samplerate,
+        input_samples=input_samples,
+        name=name,
         batch_size=batch_size,
         audio_dir=audio_dir,
+        confidence_threshold=confidence_threshold,
     )

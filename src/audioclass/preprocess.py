@@ -5,7 +5,7 @@ import numpy as np
 import xarray as xr
 from soundevent import arrays, audio, data
 
-from birdnetsnd.constants import INPUT_SAMPLES, SAMPLERATE
+from audioclass.constants import INPUT_SAMPLES, SAMPLERATE
 
 __all__ = [
     "load_recording",

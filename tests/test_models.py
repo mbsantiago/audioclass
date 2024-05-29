@@ -2,7 +2,7 @@ import datetime
 
 import numpy as np
 import xarray as xr
-from birdnetsnd.model import BirdNET, load_model
+from audioclass.model import BirdNET, load_model
 from soundevent import data
 
 

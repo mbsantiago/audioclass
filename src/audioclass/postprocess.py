@@ -5,7 +5,7 @@ import numpy as np
 import xarray as xr
 from soundevent import data
 
-from birdnetsnd.constants import DEFAULT_THRESHOLD, HOP_SIZE
+from audioclass.constants import DEFAULT_THRESHOLD, HOP_SIZE
 
 __all__ = [
     "convert_to_dataset",

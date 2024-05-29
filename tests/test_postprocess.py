@@ -2,7 +2,7 @@ import datetime
 
 import numpy as np
 import pytest
-from birdnetsnd.postprocess import (
+from audioclass.postprocess import (
     convert_to_features_array,
     convert_to_predicted_tags_list,
     convert_to_probabilities_array,

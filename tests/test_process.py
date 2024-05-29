@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
-from birdnetsnd.model import load_model
-from birdnetsnd.process import process_array
+from audioclass.model import load_model
+from audioclass.process import process_array
 from tflite_runtime.interpreter import Interpreter
 
 

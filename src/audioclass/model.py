@@ -1,33 +1,46 @@
 import datetime
+from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Literal, Optional, Tuple, Union, overload
+from typing import List, Literal, NamedTuple, Optional, Union, overload
 
 import numpy as np
+import pandas as pd
 import xarray as xr
 from soundevent import data
 from tflite_runtime.interpreter import Interpreter
 
-from birdnetsnd.constants import (
+from audioclass.batch import (
+    process_dataframe,
+    process_directory,
+    process_file_list,
+    process_recordings,
+)
+from audioclass.constants import (
     DEFAULT_THRESHOLD,
     LABELS_PATH,
     MODEL_PATH,
     SAMPLERATE,
 )
-from birdnetsnd.postprocess import (
+from audioclass.postprocess import (
     convert_to_dataset,
     convert_to_features_list,
     convert_to_predicted_tags_list,
 )
-from birdnetsnd.preprocess import (
+from audioclass.preprocess import (
     load_clip,
 )
-from birdnetsnd.process import process_array
+from audioclass.process import process_array
 
 __all__ = [
     "BirdNET",
     "load_model",
     "load_tags",
 ]
+
+
+class ModelOutput(NamedTuple):
+    class_probs: np.ndarray
+    features: np.ndarray
 
 
 def load_model(
@@ -76,59 +89,16 @@ def load_tags(
     ]
 
 
-class BirdNET:
-    name: str = "BirdNET"
+class ClipClassificationModel(ABC):
+    name: str
     samplerate: int
     input_samples: int
     num_classes: int
-    interpreter: Interpreter
+    confidence_threshold: float
     tags: List[data.Tag]
 
-    def __init__(
-        self,
-        interpreter: Interpreter,
-        tags: List[data.Tag],
-        confidence_threshold: float = DEFAULT_THRESHOLD,
-        samplerate: int = SAMPLERATE,
-    ):
-        self.interpreter = interpreter
-        self.tags = tags
-        self.confidence_threshold = confidence_threshold
-        self.samplerate = samplerate
-
-        input_details = self.interpreter.get_input_details()[0]
-        output_details = self.interpreter.get_output_details()[0]
-
-        self.num_classes = output_details["shape"][-1]
-        self.input_samples = input_details["shape"][-1]
-
-        if not self.num_classes == len(tags):
-            raise ValueError(
-                "Number of output labels does not match model output shape"
-            )
-
-    @classmethod
-    def from_model_file(
-        cls,
-        model_path: Path = MODEL_PATH,
-        labels_path: Path = LABELS_PATH,
-        num_threads: Optional[int] = None,
-        confidence_threshold: float = 0.1,
-        common_name: bool = False,
-    ) -> "BirdNET":
-        interpreter = load_model(model_path, num_threads)
-        tags = load_tags(labels_path, common_name=common_name)
-        return cls(
-            interpreter=interpreter,
-            tags=tags,
-            confidence_threshold=confidence_threshold,
-        )
-
-    def process_array(
-        self,
-        array: np.ndarray,
-    ) -> Tuple[np.ndarray, np.ndarray]:
-        return process_array(self.interpreter, array)
+    @abstractmethod
+    def process_array(self, array: np.ndarray) -> ModelOutput: ...
 
     @overload
     def process_file(  # pragma: no cover
@@ -212,6 +182,84 @@ class BirdNET:
 
         return self._convert_to_dataset(clip, class_probs, features)
 
+    def process_recordings(
+        self,
+        recordings: List[data.Recording],
+        batch_size: int = 32,
+    ) -> List[data.ClipPrediction]:
+        return process_recordings(
+            self.process_array,
+            recordings,
+            self.tags,
+            samplerate=self.samplerate,
+            input_samples=self.input_samples,
+            name=self.name,
+            batch_size=batch_size,
+            confidence_threshold=self.confidence_threshold,
+        )
+
+    def process_directory(
+        self,
+        directory: Path,
+        recursive: bool = False,
+        batch_size: int = 32,
+    ) -> List[data.ClipPrediction]:
+        return process_directory(
+            self.process_array,
+            directory,
+            self.tags,
+            samplerate=self.samplerate,
+            input_samples=self.input_samples,
+            confidence_threshold=self.confidence_threshold,
+            name=self.name,
+            recursive=recursive,
+            batch_size=batch_size,
+        )
+
+    def process_file_list(
+        self,
+        files: List[Path],
+        batch_size: int = 32,
+    ) -> List[data.ClipPrediction]:
+        return process_file_list(
+            self.process_array,
+            files,
+            self.tags,
+            samplerate=self.samplerate,
+            input_samples=self.input_samples,
+            confidence_threshold=self.confidence_threshold,
+            name=self.name,
+            batch_size=batch_size,
+        )
+
+    def process_dataframe(
+        self,
+        df: pd.DataFrame,
+        batch_size: int = 32,
+        audio_dir: Optional[Path] = None,
+        path_col: str = "path",
+        latitude_col: Optional[str] = "latitude",
+        longitude_col: Optional[str] = "longitude",
+        recorded_on_col: Optional[str] = "recorded_on",
+        additional_cols: Optional[list[str]] = None,
+    ) -> List[data.ClipPrediction]:
+        return process_dataframe(
+            self.process_array,
+            df,
+            self.tags,
+            audio_dir=audio_dir,
+            batch_size=batch_size,
+            samplerate=self.samplerate,
+            input_samples=self.input_samples,
+            name=self.name,
+            confidence_threshold=self.confidence_threshold,
+            path_col=path_col,
+            latitude_col=latitude_col,
+            longitude_col=longitude_col,
+            recorded_on_col=recorded_on_col,
+            additional_cols=additional_cols,
+        )
+
     def _convert_to_dataset(
         self,
         clip: data.Clip,
@@ -270,3 +318,57 @@ class BirdNET:
                 zip(predicted_tags, features_list)
             )
         ]
+
+
+class BirdNET(ClipClassificationModel):
+    name: str = "BirdNET"
+    samplerate: int
+    input_samples: int
+    num_classes: int
+    interpreter: Interpreter
+    confidence_threshold: float
+    tags: List[data.Tag]
+
+    def __init__(
+        self,
+        interpreter: Interpreter,
+        tags: List[data.Tag],
+        confidence_threshold: float = DEFAULT_THRESHOLD,
+        samplerate: int = SAMPLERATE,
+    ):
+        self.interpreter = interpreter
+        self.tags = tags
+        self.confidence_threshold = confidence_threshold
+        self.samplerate = samplerate
+
+        input_details = self.interpreter.get_input_details()[0]
+        output_details = self.interpreter.get_output_details()[0]
+
+        self.num_classes = output_details["shape"][-1]
+        self.input_samples = input_details["shape"][-1]
+
+        if not self.num_classes == len(tags):
+            raise ValueError(
+                "Number of output labels does not match model output shape"
+            )
+
+    @classmethod
+    def from_model_file(
+        cls,
+        model_path: Path = MODEL_PATH,
+        labels_path: Path = LABELS_PATH,
+        num_threads: Optional[int] = None,
+        confidence_threshold: float = 0.1,
+        common_name: bool = False,
+    ) -> "BirdNET":
+        interpreter = load_model(model_path, num_threads)
+        tags = load_tags(labels_path, common_name=common_name)
+        return cls(
+            interpreter=interpreter,
+            tags=tags,
+            confidence_threshold=confidence_threshold,
+        )
+
+    def process_array(self, array: np.ndarray) -> ModelOutput:
+        class_probs, features = process_array(self.interpreter, array)
+        return ModelOutput(class_probs=class_probs, features=features)

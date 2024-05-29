@@ -1,12 +1,12 @@
 import datetime
 from pathlib import Path
-from typing import List
+from typing import Callable, List, Tuple
 
 import numpy as np
 import pandas as pd
 import pytest
-from birdnetsnd.batch import files_dataset, process_dataframe
-from birdnetsnd.model import BirdNET
+from audioclass.batch import files_dataset, process_dataframe
+from soundevent import data
 
 
 @pytest.fixture
@@ -38,13 +38,26 @@ def dataframe(file_list):
 
 
 @pytest.fixture
-def birdnet_model():
-    return BirdNET.from_model_file()
+def process_array() -> Callable[[np.ndarray], Tuple[np.ndarray, np.ndarray]]:
+    def process_array(array: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        # 1 class and 1 feature
+        return np.zeros((array.shape[0], 1)), np.zeros((array.shape[0], 1))
+
+    return process_array
 
 
-def test_process_dataframe_checks_columns(dataframe, birdnet_model):
+@pytest.fixture
+def tags() -> List[data.Tag]:
+    return [data.Tag(key="test", value="test")]
+
+
+def test_process_dataframe_checks_columns(
+    dataframe,
+    process_array: Callable[[np.ndarray], Tuple[np.ndarray, np.ndarray]],
+    tags: List[data.Tag],
+):
     with pytest.raises(ValueError):
-        process_dataframe(birdnet_model, dataframe, path_col="foo")
+        process_dataframe(process_array, dataframe, tags, path_col="foo")
 
 
 def test_can_iterate_over_file_list(file_list: List[Path]):

@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from birdnetsnd.preprocess import (
+from audioclass.preprocess import (
     load_clip,
     load_recording,
     resample_audio,

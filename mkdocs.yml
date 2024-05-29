@@ -2,7 +2,8 @@ site_name: audioclass
 site_url: https://mbsantiago.github.io/audioclass/
 nav:
   - Home: README.md
-  - Introduction: introduction.md
+  - Getting Started: getting_started.md
+  - Guide: usage_guide.md
   - Reference:
       - preprocess: reference/preprocess.md
       - models:

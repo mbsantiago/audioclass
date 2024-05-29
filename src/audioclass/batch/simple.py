@@ -1,3 +1,5 @@
+"""Module for providing a simple audio batch iterator."""
+
 from collections import deque
 
 import numpy as np
@@ -7,7 +9,34 @@ from audioclass.preprocess import load_recording
 
 
 class SimpleIterator(BaseIterator):
+    """A straightforward iterator for processing audio recordings in batches.
+
+    This iterator loads and preprocesses audio recordings one at a time, then
+    groups them into batches for efficient processing by machine learning
+    models.
+
+    It's ideal for smaller datasets.
+
+    Notes
+    -----
+    For larger datasets or situations requiring parallel processing, consider
+    using alternative iterators like `TFDatasetIterator` or a custom
+    implementation.
+    """
+
     def __iter__(self) -> BatchGenerator:
+        """Iterate over the audio data, yielding batches.
+
+        Yields
+        ------
+        Batch
+            A batch of audio data, consisting of:
+            - A numpy array of shape (batch_size, num_samples) containing the
+            audio data.
+            - A list of corresponding `Recording` objects.
+            - A numpy array of shape (batch_size,) containing the frame indices
+            for each audio clip in the batch.
+        """
         array_queue = deque(maxlen=self.batch_size * 4)
         recording_queue = deque(maxlen=self.batch_size * 4)
         frame_queue = deque(maxlen=self.batch_size * 4)

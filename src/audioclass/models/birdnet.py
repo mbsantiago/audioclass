@@ -1,3 +1,30 @@
+"""Module for loading and using the BirdNET audio classification model.
+
+This module provides a convenient interface for working with the BirdNET model,
+which is a TensorFlow Lite-based model designed for bird sound classification.
+It includes the `BirdNET` class, which is a subclass of `TFLiteModel`, and
+functions for loading the model and its associated labels.
+
+Notes
+-----
+The BirdNET model was developed by the K. Lisa Yang Center for Conservation
+Bioacoustics at the Cornell Lab of Ornithology, in collaboration with Chemnitz
+University of Technology. This package is not affiliated with the BirdNET
+project.
+
+BirdNET is licensed under a Creative Commons
+Attribution-NonCommercial-ShareAlike 4.0 International License.
+
+If you use the BirdNET model, please cite:
+
+    Kahl, S., Wood, C. M., Eibl, M., & Klinck, H. (2021). BirdNET: A deep
+    learning solution for avian diversity monitoring. Ecological Informatics,
+    61, 101236.
+
+For further details, please visit the official
+[BirdNET repository](https://github.com/kahst/BirdNET-Analyzer)
+"""
+
 from pathlib import Path
 from typing import List, Optional, Union
 
@@ -15,12 +42,33 @@ from audioclass.utils import load_artifact
 __all__ = ["BirdNET"]
 
 INPUT_SAMPLES = 144000
+"""Default number of samples expected in the input tensor.
+
+This value corresponds to 3 seconds of audio data at a sample rate of 48,000
+Hz.
+"""
+
 SAMPLERATE = 48_000
+"""Default sample rate of the audio data expected by the model (in Hz).
+
+This value corresponds to the sample rate used by the BirdNET model.
+"""
+
 MODEL_PATH = "https://github.com/kahst/BirdNET-Analyzer/raw/main/checkpoints/V2.4/BirdNET_GLOBAL_6K_V2.4_Model_FP32.tflite"
+"""Default path to the BirdNET TensorFlow Lite model file."""
+
 LABELS_PATH = "https://github.com/kahst/BirdNET-Analyzer/raw/main/checkpoints/V2.4/BirdNET_GLOBAL_6K_V2.4_Labels.txt"
+"""Default path to the BirdNET labels file."""
 
 
 class BirdNET(TFLiteModel):
+    """BirdNET audio classification model.
+
+    This class is a wrapper around a TensorFlow Lite model for bird sound
+    classification. It provides methods for loading the model, processing audio
+    data, and returning predictions.
+    """
+
     @classmethod
     def load(
         cls,
@@ -32,6 +80,36 @@ class BirdNET(TFLiteModel):
         name: str = "BirdNET",
         common_name: bool = False,
     ) -> "BirdNET":
+        """Load a BirdNET model from a file or URL.
+
+        Parameters
+        ----------
+        model_path
+            The path or URL to the TensorFlow Lite model file. Defaults to the
+            latest version of the BirdNET model.
+        labels_path
+            The path or URL to the labels file. Defaults to the latest version
+            of the BirdNET labels.
+        num_threads
+            The number of threads to use for inference. If None, the default
+            number of threads will be used.
+        confidence_threshold
+            The minimum confidence threshold for making predictions. Defaults
+            to `DEFAULT_THRESHOLD`.
+        samplerate
+            The sample rate of the audio data expected by the model (in Hz).
+            Defaults to 48,000 Hz.
+        name
+            The name of the model. Defaults to "BirdNET".
+        common_name
+            Whether to use common names for bird species instead of scientific
+            names. Defaults to False.
+
+        Returns
+        -------
+        BirdNET
+            An instance of the BirdNET class.
+        """
         model_path = load_artifact(model_path)
         labels_path = load_artifact(labels_path)
         interpreter = load_model(model_path, num_threads)
@@ -50,28 +128,22 @@ def load_tags(
     path: Union[Path, str] = LABELS_PATH,
     common_name: bool = False,
 ) -> List[data.Tag]:
-    """Load BirdNET labels from a file.
+    """
+    Load BirdNET labels from a file.
 
     Parameters
     ----------
-    path : Path
-        Path to the file containing the labels.
-    common_name : bool, optional
-        Whether to return the common name instead of the scientific name, by
-        default False
+    path
+        Path or URL to the file containing the labels. Defaults to the latest
+        version of the BirdNET labels.
+    common_name
+        Whether to return the common name instead of the scientific name.
+        Defaults to False.
 
     Returns
     -------
-    List[str]
-        List of labels.
-
-    Notes
-    -----
-    The file should contain one label per line and should be in the format:
-
-    ```
-    <scientific_name>_<common_name>
-    ```
+    List[data.Tag]
+        List of soundevent `Tag` objects.
     """
     path = load_artifact(path)
 
@@ -86,7 +158,18 @@ def load_tags(
 
 
 def get_signature(interpreter: Interpreter) -> Signature:
-    """Get the signature of a BirdNET model."""
+    """Get the signature of a BirdNET model.
+
+    Parameters
+    ----------
+    interpreter : Interpreter
+        The TensorFlow Lite interpreter object.
+
+    Returns
+    -------
+    Signature
+        The signature of the BirdNET model.
+    """
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 

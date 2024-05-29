@@ -1,3 +1,5 @@
+"""Module for providing a TensorFlow Dataset-based audio batch iterator."""
+
 import tensorflow as tf
 from tensorflow import data as tfdata
 
@@ -10,7 +12,28 @@ __all__ = [
 
 
 class TFDatasetIterator(BaseIterator):
+    """A TensorFlow Dataset-based audio batch iterator.
+
+    This iterator leverages TensorFlow's Dataset API to efficiently load,
+    preprocess, and batch audio data for model training and inference. It
+    provides parallel loading and preprocessing capabilities, making it
+    suitable for large datasets.
+    """
+
     def __iter__(self) -> BatchGenerator:
+        """Iterate over the audio data, yielding batches.
+
+        Yields
+        ------
+        Batch
+            A batch of audio data, consisting of:
+                - A numpy array of shape (batch_size, num_samples) containing
+                the audio data.
+                - A list of corresponding `Recording` objects.
+                - A numpy array of shape (batch_size,) containing the frame
+                indices for each audio clip in the batch.
+        """
+
         @tf.py_function(Tout=tf.float32)  # type: ignore
         def apply_fn(index):  # pragma: no cover
             index = index.numpy()

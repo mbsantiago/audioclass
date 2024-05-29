@@ -12,7 +12,6 @@ def perch() -> Perch:
     return Perch.load()
 
 
-@pytest.mark.slow
 def test_loaded_perch_model_has_correct_signature(perch: Perch):
     assert perch.callable is not None
     assert perch.signature is not None
@@ -23,7 +22,6 @@ def test_loaded_perch_model_has_correct_signature(perch: Perch):
     assert perch.signature.feature_name == "output_1"
 
 
-@pytest.mark.slow
 def test_perch_model_can_process_random_array(perch: Perch):
     array = np.random.rand(1, 160000).astype(np.float32)
     results = perch.process_array(array)
@@ -35,7 +33,6 @@ def test_perch_model_can_process_random_array(perch: Perch):
     assert class_probs.shape == (1, 10932)
 
 
-@pytest.mark.slow
 def test_perch_model_can_process_file(random_wav_factory, perch: Perch):
     path = random_wav_factory(duration=10)
     clip_predictions = perch.process_file(path)
@@ -43,7 +40,6 @@ def test_perch_model_can_process_file(random_wav_factory, perch: Perch):
     assert all(isinstance(cp, data.ClipPrediction) for cp in clip_predictions)
 
 
-@pytest.mark.slow
 def test_perch_model_can_process_recording(random_wav_factory, perch: Perch):
     path = random_wav_factory(duration=10)
     recording = data.Recording.from_file(path)
@@ -52,7 +48,6 @@ def test_perch_model_can_process_recording(random_wav_factory, perch: Perch):
     assert all(isinstance(cp, data.ClipPrediction) for cp in clip_predictions)
 
 
-@pytest.mark.slow
 def test_perch_model_can_process_clip(random_wav_factory, perch: Perch):
     path = random_wav_factory(duration=10)
     clip = data.Clip(
@@ -69,7 +64,6 @@ def test_perch_model_can_process_clip(random_wav_factory, perch: Perch):
     assert clip_prediction.clip.end_time == 6
 
 
-@pytest.mark.slow
 def test_perch_process_clip_with_dataset_output(
     random_wav_factory, perch: Perch
 ):
@@ -85,7 +79,6 @@ def test_perch_process_clip_with_dataset_output(
     assert "probabilities" in dataset
 
 
-@pytest.mark.slow
 def test_perch_can_process_recording_with_metadata(
     random_wav_factory, perch: Perch
 ):

@@ -1,19 +1,16 @@
 import datetime
 
 import numpy as np
-import pytest
 import xarray as xr
 from audioclass.models.birdnet import BirdNET
 from soundevent import data
 
 
-@pytest.mark.slow
 def test_can_instantiate_birdnet_model_from_model_files():
     model = BirdNET.load()
     assert isinstance(model, BirdNET)
 
 
-@pytest.mark.slow
 def test_birdnet_model_can_process_random_array():
     model = BirdNET.load(confidence_threshold=0)
     array = np.random.rand(1, 144000).astype(np.float32)
@@ -26,7 +23,6 @@ def test_birdnet_model_can_process_random_array():
     assert class_probs.shape == (1, 6522)
 
 
-@pytest.mark.slow
 def test_birdnet_model_can_process_file(random_wav_factory):
     model = BirdNET.load()
     path = random_wav_factory(duration=10)
@@ -35,7 +31,6 @@ def test_birdnet_model_can_process_file(random_wav_factory):
     assert all(isinstance(cp, data.ClipPrediction) for cp in clip_predictions)
 
 
-@pytest.mark.slow
 def test_birdnet_model_can_process_recording(random_wav_factory):
     model = BirdNET.load()
     path = random_wav_factory(duration=10)
@@ -45,7 +40,6 @@ def test_birdnet_model_can_process_recording(random_wav_factory):
     assert all(isinstance(cp, data.ClipPrediction) for cp in clip_predictions)
 
 
-@pytest.mark.slow
 def test_birdnet_model_can_process_clip(random_wav_factory):
     model = BirdNET.load()
     path = random_wav_factory(duration=10)
@@ -63,7 +57,6 @@ def test_birdnet_model_can_process_clip(random_wav_factory):
     assert clip_prediction.clip.end_time == 4
 
 
-@pytest.mark.slow
 def test_birdnet_process_clip_with_dataset_output(random_wav_factory):
     model = BirdNET.load()
     path = random_wav_factory(duration=10)
@@ -78,7 +71,6 @@ def test_birdnet_process_clip_with_dataset_output(random_wav_factory):
     assert "probabilities" in dataset
 
 
-@pytest.mark.slow
 def test_birdnet_can_process_recording_with_metadata(random_wav_factory):
     model = BirdNET.load()
     path = random_wav_factory(duration=10)

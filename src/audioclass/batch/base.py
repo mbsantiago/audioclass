@@ -1,3 +1,12 @@
+"""Module for defining base classes and functions for batch processing.
+
+This module provides abstract classes and utility functions for creating
+iterators that generate batches of audio data from various sources, such as
+lists of files, directories, or pandas DataFrames. These iterators are designed
+to be used with audio classification models to process large amounts of audio
+data efficiently.
+"""
+
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Generator, List, Optional, Tuple, TypeAlias
@@ -23,7 +32,7 @@ AudioArray: TypeAlias = np.ndarray
 IndexArray: TypeAlias = np.ndarray
 """A 1D array of indices of shape (batch_size, ).
 
-These indices are correspond to the index of the file in the list of files
+These indices correspond to the index of the file in the list of files
 being iterated over.
 """
 
@@ -35,7 +44,12 @@ audio file is split into multiple frames, this number will be the frame number.
 """
 
 Batch: TypeAlias = Tuple[AudioArray, List[data.Recording], FrameArray]
-"""A single batch of audio data."""
+"""A single batch of audio data consisting of:
+
+- AudioArray: The audio data as a numpy array.
+- List[data.Recording]: The corresponding list of Recording objects.
+- FrameArray: The frame indices for each audio clip in the batch.
+"""
 
 
 BatchGenerator: TypeAlias = Generator[
@@ -43,10 +57,32 @@ BatchGenerator: TypeAlias = Generator[
     None,
     None,
 ]
-"""An iterator that yields batches of audio data."""
+"""A generator that yields batches of audio data."""
 
 
 class BaseIterator(ABC):
+    """Abstract base class for audio batch iterators.
+
+    This class defines the common interface for iterators that generate batches
+    of audio data from different sources. It provides methods for creating
+    iterators from files, directories, and pandas DataFrames.
+    """
+
+    recordings: List[data.Recording]
+    """The list of Recording objects to be processed."""
+
+    samplerate: int
+    """The target sample rate for resampling the audio data (in Hz)."""
+
+    input_samples: int
+    """The number of samples per audio frame."""
+
+    batch_size: int
+    """The number of audio frames per batch."""
+
+    audio_dir: Optional[Path]
+    """The directory containing the audio files."""
+
     def __init__(
         self,
         recordings: List[data.Recording],
@@ -55,6 +91,22 @@ class BaseIterator(ABC):
         batch_size: int = BATCH_SIZE,
         audio_dir: Optional[Path] = None,
     ):
+        """Initialize the BaseIterator.
+
+        Parameters
+        ----------
+        recordings
+            A list of `Recording` objects representing the audio files to be
+            processed.
+        samplerate
+            The target sample rate for resampling the audio data (in Hz).
+        input_samples
+            The number of samples per audio frame.
+        batch_size
+            The number of audio frames per batch. Defaults to `BATCH_SIZE`.
+        audio_dir
+            The directory containing the audio files. Defaults to None.
+        """
         self.recordings = recordings
         self.samplerate = samplerate
         self.input_samples = input_samples
@@ -62,7 +114,21 @@ class BaseIterator(ABC):
         self.audio_dir = audio_dir
 
     @abstractmethod
-    def __iter__(self) -> BatchGenerator: ...  # pragma: no cover
+    def __iter__(self) -> BatchGenerator:  # pragma: no cover
+        """Iterate over the audio data, yielding batches.
+
+        This is an abstract method that must be implemented by subclasses.
+
+        Yields
+        ------
+        Batch
+            A batch of audio data, consisting of:
+                - A numpy array of shape (batch_size, num_samples) containing
+                the audio data.
+                - A list of corresponding `Recording` objects.
+                - A numpy array of shape (batch_size,) containing the frame
+                indices for each audio clip in the batch.
+        """
 
     @classmethod
     def from_files(
@@ -73,6 +139,26 @@ class BaseIterator(ABC):
         batch_size: int = BATCH_SIZE,
         audio_dir: Optional[Path] = None,
     ):
+        """Create a batch iterator from a list of audio files.
+
+        Parameters
+        ----------
+        files
+            A list of paths to the audio files.
+        samplerate
+            The target sample rate for resampling the audio data (in Hz).
+        input_samples
+            The number of samples per audio frame.
+        batch_size
+            The number of audio frames per batch. Defaults to `BATCH_SIZE`.
+        audio_dir
+            The directory containing the audio files. Defaults to None.
+
+        Returns
+        -------
+        BaseIterator
+            A batch iterator for the specified audio files.
+        """
         return cls(  # pragma: no cover
             recordings_from_files(files),
             samplerate=samplerate,
@@ -90,6 +176,27 @@ class BaseIterator(ABC):
         batch_size: int = BATCH_SIZE,
         recursive: bool = True,
     ):
+        """Create a batch iterator from a directory of audio files.
+
+        Parameters
+        ----------
+        directory
+            The path to the directory containing the audio files.
+        samplerate
+            The target sample rate for resampling the audio data (in Hz).
+        input_samples
+            The number of samples per audio frame.
+        batch_size
+            The number of audio frames per batch. Defaults to `BATCH_SIZE`.
+        recursive
+            Whether to search for audio files recursively in subdirectories.
+            Defaults to True.
+
+        Returns
+        -------
+        BaseIterator
+            A batch iterator for the audio files in the specified directory.
+        """
         return cls(  # pragma: no cover
             recordings_from_directory(directory, recursive=recursive),
             samplerate=samplerate,
@@ -112,6 +219,41 @@ class BaseIterator(ABC):
         recorded_on_col: Optional[str] = "recorded_on",
         additional_cols: Optional[list[str]] = None,
     ):
+        """Create a batch iterator from a pandas DataFrame.
+
+        Parameters
+        ----------
+        df
+            A DataFrame containing information about the audio files.
+        samplerate
+            The target sample rate for resampling the audio data (in Hz).
+        input_samples
+            The number of samples per audio frame.
+        batch_size
+            The number of audio frames per batch. Defaults to `BATCH_SIZE`.
+        audio_dir
+            The directory containing the audio files. Defaults to None.
+        path_col
+            The name of the column in the DataFrame containing the paths to the
+            audio files. Defaults to "path".
+        latitude_col
+            The name of the column in the DataFrame containing the latitudes of
+            the recording locations. Defaults to "latitude".
+        longitude_col
+            The name of the column in the DataFrame containing the longitudes
+            of the recording locations. Defaults to "longitude".
+        recorded_on_col
+            The name of the column in the DataFrame containing the recording
+            timestamps. Defaults to "recorded_on".
+        additional_cols
+            A list of additional columns in the DataFrame to include as tags in
+            the `Recording` objects. Defaults to None.
+
+        Returns
+        -------
+        BaseIterator
+            A batch iterator for the audio files specified in the DataFrame.
+        """
         return cls(  # pragma: no cover
             recordings_from_dataframe(
                 df,
@@ -129,6 +271,18 @@ class BaseIterator(ABC):
 
 
 def recordings_from_files(files: List[Path]) -> List[data.Recording]:
+    """Create a list of `Recording` objects from a list of file paths.
+
+    Parameters
+    ----------
+    files
+        A list of paths to audio files.
+
+    Returns
+    -------
+    List[data.Recording]
+        A list of `Recording` objects corresponding to the input files.
+    """
     return [
         data.Recording.from_file(file, compute_hash=False) for file in files
     ]
@@ -138,6 +292,22 @@ def recordings_from_directory(
     directory: Path,
     recursive: bool = True,
 ) -> List[data.Recording]:
+    """Create a list of `Recording` objects from audio files in a directory.
+
+    Parameters
+    ----------
+    directory
+        The path to the directory containing the audio files.
+    recursive
+        Whether to search for audio files recursively in subdirectories.
+        Defaults to True.
+
+    Returns
+    -------
+    List[data.Recording]
+        A list of `Recording` objects corresponding to the audio files found in
+        the directory.
+    """
     files = list(audio.get_audio_files(directory, recursive=recursive))
     return recordings_from_files(files)
 
@@ -150,6 +320,43 @@ def recordings_from_dataframe(
     recorded_on_col: Optional[str] = "recorded_on",
     additional_cols: Optional[list[str]] = None,
 ) -> List[data.Recording]:
+    """Create a list of `Recording` objects from a pandas DataFrame.
+
+    The DataFrame should contain a column with file paths (specified by
+    `path_col`), and optionally columns for latitude, longitude, recorded_on
+    timestamp, and any additional columns to be included as tags in the
+    `Recording` objects.
+
+    Parameters
+    ----------
+    df
+        A pandas DataFrame containing information about the audio files.
+    path_col
+        The name of the column containing the file paths. Defaults to "path".
+    latitude_col
+        The name of the column containing the latitudes. Defaults to
+        "latitude".
+    longitude_col
+        The name of the column containing the longitudes. Defaults to
+        "longitude".
+    recorded_on_col
+        The name of the column containing the recorded_on timestamps. Defaults
+        to "recorded_on".
+    additional_cols
+        A list of additional column names to include as tags in the `Recording`
+        objects. Defaults to None.
+
+    Returns
+    -------
+    List[data.Recording]
+        A list of `Recording` objects corresponding to the rows in the
+        DataFrame.
+
+    Raises
+    ------
+    ValueError
+        If the DataFrame does not contain the required columns.
+    """
     if additional_cols is None:
         additional_cols = []
 
@@ -169,7 +376,10 @@ def recordings_from_dataframe(
     for _, row in df.iterrows():
         path = Path(row[path_col])  # type: ignore
         recorded_on = row.get(recorded_on_col)
-        tags = [data.Tag(key=col, value=row[col]) for col in additional_cols]  # type: ignore
+        tags = [
+            data.Tag(key=col, value=row[col])  # type: ignore
+            for col in additional_cols
+        ]
         recording = data.Recording.from_file(
             path=path,
             compute_hash=False,

@@ -1,3 +1,11 @@
+"""Module defining the base classes for audio classification models and their output format.
+
+This module provides abstract classes for clip classification models,
+establishing a standard interface for model input, processing, and output. It
+also defines the structure of the model output, which includes class
+probabilities and extracted features.
+"""
+
 import datetime
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -7,15 +15,13 @@ import numpy as np
 import xarray as xr
 from soundevent import data
 
-from audioclass.batch import BatchGenerator, process_iterable
+from audioclass.batch import BaseIterator, process_iterable
 from audioclass.postprocess import (
     convert_to_dataset,
     convert_to_features_list,
     convert_to_predicted_tags_list,
 )
-from audioclass.preprocess import (
-    load_clip,
-)
+from audioclass.preprocess import load_clip
 
 __all__ = [
     "ModelOutput",
@@ -24,20 +30,73 @@ __all__ = [
 
 
 class ModelOutput(NamedTuple):
+    """Output format for audio classification models."""
+
     class_probs: np.ndarray
+    """Array of class probabilities for each frame.
+
+    The array has shape `(num_frames, num_classes)`, where `num_frames` is the
+    number of frames in the input audio clip and `num_classes` is the number of
+    classes that the model can predict.
+
+    Notice that the interpretation may vary depending on the model and it is
+    advisable to check the model's documentation for more information.
+    """
+
     features: np.ndarray
+    """Array of extracted features for each frame.
+
+    The array has shape `(num_frames, num_features)`, where `num_frames` is the
+    number of frames in the input audio clip and `num_features` is the number
+    of features extracted by the model.
+
+    The features can be used for further analysis or visualization of the model
+    output.
+    """
 
 
 class ClipClassificationModel(ABC):
+    """Abstract base class for audio clip classification models.
+
+    This class defines the common interface for audio classification models
+    that process individual clips. It provides methods for processing raw audio
+    arrays, files, recordings, and clips, as well as an iterable of clips.
+    """
+
     name: str
+    """The name of the model."""
+
     samplerate: int
+    """The sample rate of the audio data expected by the model (in Hz)."""
+
     input_samples: int
+    """The number of audio samples expected in each input frame."""
+
     num_classes: int
+    """The number of classes that the model can predict."""
+
     confidence_threshold: float
+    """The minimum confidence threshold for a class to be considered."""
+
     tags: List[data.Tag]
+    """The list of tags that the model can predict."""
 
     @abstractmethod
-    def process_array(self, array: np.ndarray) -> ModelOutput: ...
+    def process_array(self, array: np.ndarray) -> ModelOutput:
+        """Process a single audio array and return the model output.
+
+        Parameters
+        ----------
+        array
+            The audio array to be processed, with shape
+            `(num_frames, input_samples)`.
+
+        Returns
+        -------
+        ModelOutput
+            A `ModelOutput` object containing the class probabilities and
+            extracted features.
+        """
 
     @overload
     def process_file(  # pragma: no cover
@@ -61,6 +120,24 @@ class ClipClassificationModel(ABC):
         fmt: Literal["soundevent", "dataset"] = "soundevent",
         **kwargs,
     ) -> Union[List[data.ClipPrediction], xr.Dataset]:
+        """Process an audio file and return the model output.
+
+        Parameters
+        ----------
+        path
+            The path to the audio file.
+        fmt
+            The desired output format. "soundevent" returns a list of
+            `ClipPrediction` objects, while "dataset" returns an xarray
+            `Dataset`. Defaults to "soundevent".
+        **kwargs
+            Additional keyword arguments to pass to `Recording.from_file()`.
+
+        Returns
+        -------
+        Union[List[data.ClipPrediction], xr.Dataset]
+            The model output in the specified format.
+        """
         recording = data.Recording.from_file(path, **kwargs)
         return self.process_recording(recording, fmt=fmt)
 
@@ -83,6 +160,22 @@ class ClipClassificationModel(ABC):
         recording: data.Recording,
         fmt: Literal["soundevent", "dataset"] = "soundevent",
     ) -> Union[List[data.ClipPrediction], xr.Dataset]:
+        """Process an audio recording and return the model output.
+
+        Parameters
+        ----------
+        recording
+            The `Recording` object representing the audio.
+        fmt
+            The desired output format. "soundevent" returns a list of
+            `ClipPrediction` objects, while "dataset" returns an xarray
+            `Dataset`. Defaults to "soundevent".
+
+        Returns
+        -------
+        Union[List[data.ClipPrediction], xr.Dataset]
+            The model output in the specified format.
+        """
         clip = data.Clip(
             recording=recording,
             start_time=0,
@@ -109,6 +202,22 @@ class ClipClassificationModel(ABC):
         clip: data.Clip,
         fmt: Literal["soundevent", "dataset"] = "soundevent",
     ) -> Union[List[data.ClipPrediction], xr.Dataset]:
+        """Process an audio clip and return the model output.
+
+        Parameters
+        ----------
+        clip
+            The `Clip` object representing the audio segment.
+        fmt
+            The desired output format. "soundevent" returns a list of
+            `ClipPrediction` objects, while "dataset" returns an xarray
+            `Dataset`. Defaults to "soundevent".
+
+        Returns
+        -------
+        Union[List[data.ClipPrediction], xr.Dataset]
+            The model output in the specified format.
+        """
         array = load_clip(
             clip,
             samplerate=self.samplerate,
@@ -123,14 +232,25 @@ class ClipClassificationModel(ABC):
 
     def process_iterable(
         self,
-        iterable: BatchGenerator,
+        iterable: BaseIterator,
     ) -> List[data.ClipPrediction]:
+        """Process an iterable of audio clips and return a list of predictions.
+
+        Parameters
+        ----------
+        iterable
+            An iterator that yields `Clip` objects.
+
+        Returns
+        -------
+        List[data.ClipPrediction]
+            A list of `ClipPrediction` objects, one for each clip in the
+            iterable.
+        """
         return process_iterable(
             self.process_array,
             iterable,
             self.tags,
-            samplerate=self.samplerate,
-            input_samples=self.input_samples,
             name=self.name,
             confidence_threshold=self.confidence_threshold,
         )

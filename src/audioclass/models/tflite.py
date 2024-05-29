@@ -1,3 +1,11 @@
+"""Module for defining TensorFlow Lite-based audio classification models.
+
+This module provides classes and functions for creating and using TensorFlow
+Lite models for audio classification tasks. It includes a `TFLiteModel` class
+that wraps a TensorFlow Lite interpreter and a `Signature` dataclass to define
+the model's input and output specifications.
+"""
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
@@ -19,16 +27,37 @@ __all__ = [
 
 @dataclass
 class Signature:
+    """Defines the input and output signature of a TensorFlow Lite model."""
+
     input_index: int
+    """The index of the input tensor in the model."""
+
     classification_index: int
+    """The index of the tensor containing classification probabilities."""
+
     feature_index: int
+    """The index of the tensor containing extracted features."""
+
     input_length: int
+    """The number of audio samples expected in the input tensor."""
+
     input_dtype: DTypeLike = np.float32
+    """The data type of the input tensor. Defaults to np.float32."""
 
 
 class TFLiteModel(ClipClassificationModel):
+    """A wrapper class for TensorFlow Lite audio classification models.
+
+    This class provides a standardized interface for interacting with
+    TensorFlow Lite models, allowing them to be used seamlessly with the
+    audioclass library.
+    """
+
     interpreter: Interpreter
+    """The TensorFlow Lite interpreter object."""
+
     signature: Signature
+    """The input and output signature of the model."""
 
     def __init__(
         self,
@@ -40,6 +69,26 @@ class TFLiteModel(ClipClassificationModel):
         name: str,
         logits: bool = True,
     ):
+        """Initialize a TFLiteModel.
+
+        Parameters
+        ----------
+        interpreter
+            The TensorFlow Lite interpreter object.
+        signature
+            The input and output signature of the model.
+        tags
+            The list of tags that the model can predict.
+        confidence_threshold
+            The minimum confidence threshold for assigning a tag to a clip.
+        samplerate
+            The sample rate of the audio data expected by the model (in Hz).
+        name
+            The name of the model.
+        logits
+            Whether the model outputs logits (True) or probabilities (False).
+            Defaults to True.
+        """
         self.interpreter = interpreter
         self.tags = tags
         self.confidence_threshold = confidence_threshold
@@ -53,6 +102,20 @@ class TFLiteModel(ClipClassificationModel):
         _validate_signature(self.interpreter, self.signature)
 
     def process_array(self, array: np.ndarray) -> ModelOutput:
+        """Process a single audio array and return the model output.
+
+        Parameters
+        ----------
+        array : np.ndarray
+            The audio array to be processed, with shape
+            `(num_frames, input_samples)`.
+
+        Returns
+        -------
+        ModelOutput
+            A `ModelOutput` object containing the class probabilities and
+            extracted features.
+        """
         return process_array(
             self.interpreter,
             self.signature,
@@ -66,6 +129,22 @@ def load_model(
     path: Path,
     num_threads: Optional[int] = None,
 ) -> Interpreter:
+    """
+    Load a TensorFlow Lite model from a file.
+
+    Parameters
+    ----------
+    path
+        The path to the TensorFlow Lite model file.
+    num_threads
+        The number of threads to use for inference. If None, the default number
+        of threads will be used.
+
+    Returns
+    -------
+    Interpreter
+        The TensorFlow Lite interpreter object.
+    """
     interpreter = Interpreter(model_path=str(path), num_threads=num_threads)
     interpreter.allocate_tensors()
     return interpreter
@@ -74,7 +153,20 @@ def load_model(
 def _validate_signature(
     interpreter: Interpreter, signature: Signature
 ) -> None:
-    """Validate the signature of a TF Lite model."""
+    """Validate the signature of a TF Lite model.
+
+    Parameters
+    ----------
+    interpreter
+        The TF Lite model interpreter.
+    signature
+        The input and output signature of the model.
+
+    Raises
+    ------
+    ValueError
+        If the model signature does not match the expected format.
+    """
     input_details = interpreter.get_input_details()
 
     if not len(input_details) == 1:
@@ -102,38 +194,34 @@ def process_array(
     validate_signature: bool = False,
     logits: bool = True,
 ) -> ModelOutput:
-    """Process a 2D array with a TF Lite model.
+    """Process an array with a TF Lite model.
 
     Parameters
     ----------
     interpreter
         The TF Lite model interpreter.
+    signature
+        The input and output signature of the model.
     array
-        An array of audio data with shape (n_samples) or (batch_size, n_samples).
-        The number of samples should match the input shape of the model which
-        by default is 144000.
+        The audio array to be processed, with shape (num_frames, input_samples)
+        or (input_samples,).
+    validate_signature
+        Whether to validate the model signature. Defaults to False.
+    logits
+        Whether the model outputs logits (True) or probabilities (False).
+        Defaults to True.
 
     Returns
     -------
-    class_probs
-        The probability of each class for each sample. This is stored
-        in a 2D array with shape (batch_size, n_classes). The values are
-        between 0 and 1. The value at index (i, j) is the probability that
-        the class j is present in the sample i. The probability scores
-        should be interpreted as the confidence of the model in the presence
-        of the class in the sample. Caution should be taken when interpreting
-        these values as probabilities.
-    features
-        The features extracted from the audio data. This is stored in a 2D
-        array with shape (batch_size, n_features). The features are extracted
-        from the last layer of the model and can be used for further analysis.
-        The default number of features is 1024.
+    ModelOutput
+        A `ModelOutput` object containing the class probabilities and extracted
+        features.
 
     Raises
     ------
     ValueError
-        If the input array does not have 2 dimensions or if the number of
-        samples does not match the input shape of the model.
+        If the input array has the wrong shape or if the model signature is
+        invalid.
     """
     if array.ndim == 1:
         array = array[np.newaxis, :]

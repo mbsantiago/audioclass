@@ -1,3 +1,21 @@
+"""Module for batch processing audio data for classification tasks.
+
+This module provides tools for processing large collections of audio recordings
+or clips in batches. It offers:
+
+1. **Batch Iterators:** Classes like
+   [`SimpleIterator`][audioclass.batch.SimpleIterator] and
+   [`TFDatasetIterator`][audioclass.batch.tensorflow.TFDatasetIterator]
+   generate batches of audio data from various sources (files, directories,
+                                                        DataFrames).
+
+2. **Batch Processing Function:** The
+   [`process_iterable`][audioclass.batch.process_iterable] function applies a
+   model's processing function to each batch of audio data, streamlining the
+   classification workflow.
+
+"""
+
 from audioclass.batch.base import (
     BaseIterator,
     Batch,

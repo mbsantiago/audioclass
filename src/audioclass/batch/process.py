@@ -1,3 +1,5 @@
+"""Module for batch processing audio data with classification models."""
+
 from typing import Callable, List, Tuple
 
 import numpy as np
@@ -21,6 +23,34 @@ def process_iterable(
     name: str,
     confidence_threshold: float = DEFAULT_THRESHOLD,
 ) -> List[data.ClipPrediction]:
+    """Process an iterable of audio data using a models `process_array` method.
+
+    This function iterates over batches of audio clips, processes each clip
+    using the provided `process_array` function, and returns a list of
+    `ClipPrediction` objects. The `process_array` function should take a
+    numpy array of audio data and return a tuple of class probabilities and
+    extracted features.
+
+    Parameters
+    ----------
+    process_array
+        A function that takes a numpy array of audio data and returns a tuple
+        of class probabilities and extracted features.
+    iterable
+        An iterator that yields batches of audio clips.
+    tags
+        A list of tags that the model can predict.
+    name
+        The name of the model.
+    confidence_threshold
+        The minimum confidence threshold for a tag to be included in a
+        prediction. Defaults to `DEFAULT_THRESHOLD`.
+
+    Returns
+    -------
+    List[data.ClipPrediction]
+        A list of `ClipPrediction` objects, one for each audio clip.
+    """
     hop_size = iterable.input_samples / iterable.samplerate
 
     output = []

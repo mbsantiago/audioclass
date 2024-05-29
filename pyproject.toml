@@ -43,6 +43,9 @@ dev-dependencies = [
     "pytest-mock>=3.14.0",
     "ruff>=0.4.6",
     "pyright>=1.1.365",
+    "mkdocs>=1.6.0",
+    "mkdocstrings[python]>=0.25.1",
+    "mkdocs-material>=9.5.25",
 ]
 
 [tool.ruff]
@@ -54,7 +57,7 @@ docstring-code-format = true
 docstring-code-line-length = 79
 
 [tool.ruff.lint]
-select = ["E4", "E7", "E9", "F", "B", "Q", "I"]
+select = ["E4", "E7", "E9", "F", "B", "Q", "I", "D"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"

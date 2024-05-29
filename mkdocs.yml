@@ -1,0 +1,106 @@
+site_name: audioclass
+site_url: https://mbsantiago.github.io/audioclass/
+nav:
+  - Home: README.md
+  - Introduction: introduction.md
+  - Reference:
+      - preprocess: reference/preprocess.md
+      - models:
+          - reference/models/index.md
+          - reference/models/base.md
+          - reference/models/tensorflow.md
+          - reference/models/tflite.md
+          - reference/models/birdnet.md
+          - reference/models/perch.md
+      - postprocess: reference/postprocess.md
+      - batch:
+          - reference/batch/index.md
+          - reference/batch/base.md
+          - reference/batch/process.md
+          - reference/batch/simple.md
+          - reference/batch/tensorflow.md
+      - constants: reference/constants.md
+      - utils: reference/utils.md
+  - Contributing: CONTRIBUTING.md
+  - Code of Conduct: CODE_OF_CONDUCT.md
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - navigation.tracking
+    - navigation.indexes
+    - navigation.top
+    - toc.follow
+  palette:
+    - scheme: default
+      primary: pink
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: red
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: ["src"]
+          import:
+            - https://docs.python.org/3.11/objects.inv
+            - https://docs.xarray.dev/en/stable/objects.inv
+            - https://numpy.org/doc/stable/objects.inv
+            - https://mbsantiago.github.io/soundevent/objects.inv
+          options:
+            show_source: false
+            show_root_toc_entry: true
+            show_symbol_type_toc: true
+            show_root_heading: true
+            show_category_heading: true
+            show_symbol_type_heading: true
+            show_if_no_docstring: true
+            docstring_style: "numpy"
+            docstring_section_style: "table"
+            summary: true
+            signature_crossrefs: true
+            show_signature_annotations: false
+            filters:
+              - "!^_"
+            docstring_options:
+              ignore_init_summary: true
+            merge_init_into_class: true
+watch:
+  - docs
+  - src
+markdown_extensions:
+  - abbr
+  - attr_list
+  - def_list
+  - footnotes
+  - admonition
+  - tables
+  - pymdownx.critic
+  - pymdownx.keys
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.superfences:
+      preserve_tabs: true
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.snippets
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - toc:
+      toc_depth: 4
+      permalink: "#"
+      separator: "_"

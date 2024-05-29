@@ -33,7 +33,7 @@ lint-pyright:
 .PHONY: lint-ruff
 lint-ruff:
 	$(ENV_PREFIX)ruff check $(PROJECT_NAME)/
-	$(ENV_PREFIX)ruff check tests/
+	$(ENV_PREFIX)ruff check tests/ --ignore "D"
 
 .PHONY: lint
 lint: lint-pyright lint-ruff
@@ -48,7 +48,7 @@ test:    ## Run tests and generate coverage report.
 
 .PHONY: coverage
 coverage:    ## Run tests and generate coverage report.
-	$(ENV_PREFIX)coverage run -m pytest tests/ --runslow
+	$(ENV_PREFIX)coverage run -m pytest tests/
 
 .PHONY: coverage-report
 coverage-report: coverage

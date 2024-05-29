@@ -1,3 +1,11 @@
+"""Module for defining TensorFlow-based audio classification models.
+
+This module provides classes and functions for creating and using TensorFlow
+models for audio classification tasks. It includes a `TensorflowModel` class
+that wraps a TensorFlow callable and a `Signature` dataclass to define the
+model's input and output specifications.
+"""
+
 from dataclasses import dataclass
 from typing import List
 
@@ -17,16 +25,37 @@ __all__ = [
 
 @dataclass
 class Signature:
+    """Defines the input and output signature of a TensorFlow model."""
+
     input_name: str
+    """The name of the input tensor."""
+
     classification_name: str
+    """The name of the output tensor containing classification probabilities."""
+
     feature_name: str
+    """The name of the output tensor containing extracted features."""
+
     input_length: int
+    """The number of samples expected in the input tensor."""
+
     input_dtype: DTypeLike = np.float32
+    """The data type of the input tensor. Defaults to np.float32."""
 
 
 class TensorflowModel(ClipClassificationModel):
+    """A wrapper class for TensorFlow audio classification models.
+
+    This class provides a standardized interface for interacting with
+    TensorFlow models, allowing them to be used seamlessly with the audioclass
+    library.
+    """
+
     callable: Callable
+    """The TensorFlow callable representing the model."""
+
     signature: Signature
+    """The input and output signature of the model."""
 
     def __init__(
         self,
@@ -38,6 +67,26 @@ class TensorflowModel(ClipClassificationModel):
         name: str,
         logits: bool = True,
     ):
+        """Initialize a TensorflowModel.
+
+        Parameters
+        ----------
+        callable
+            The TensorFlow callable representing the model.
+        signature
+            The input and output signature of the model.
+        tags
+            The list of tags that the model can predict.
+        confidence_threshold
+            The minimum confidence threshold for assigning a tag to a clip.
+        samplerate
+            The sample rate of the audio data expected by the model (in Hz).
+        name
+            The name of the model.
+        logits
+            Whether the model outputs logits (True) or probabilities (False).
+            Defaults to True.
+        """
         self.callable = callable
         self.tags = tags
         self.confidence_threshold = confidence_threshold
@@ -51,6 +100,20 @@ class TensorflowModel(ClipClassificationModel):
         _validate_signature(self.callable, self.signature)
 
     def process_array(self, array: np.ndarray) -> ModelOutput:
+        """Process a single audio array and return the model output.
+
+        Parameters
+        ----------
+        array : np.ndarray
+            The audio array to be processed, with shape
+            `(num_frames, input_samples)`.
+
+        Returns
+        -------
+        ModelOutput
+            A `ModelOutput` object containing the class probabilities and
+            extracted features.
+        """
         return process_array(
             self.callable,
             self.signature,
@@ -61,7 +124,20 @@ class TensorflowModel(ClipClassificationModel):
 
 
 def _validate_signature(callable: Callable, signature: Signature) -> None:
-    """Validate the signature of a TensorFlow model."""
+    """Validate the signature of a TensorFlow model.
+
+    Parameters
+    ----------
+    callable : Callable
+        The TensorFlow callable representing the model.
+    signature : Signature
+        The input and output signature of the model.
+
+    Raises
+    ------
+    ValueError
+        If the model signature does not match the expected format.
+    """
     function_type = callable.function_type
     parameters = function_type.parameters
 
@@ -91,7 +167,35 @@ def process_array(
     validate_signature: bool = False,
     logits: bool = True,
 ) -> ModelOutput:
-    """Process an array with a TensorFlow model."""
+    """Process an array with a TensorFlow model.
+
+    Parameters
+    ----------
+    call
+        The TensorFlow callable representing the model.
+    signature
+        The input and output signature of the model.
+    array
+        The audio array to be processed, with shape (num_frames, input_samples)
+        or (input_samples,).
+    validate_signature
+        Whether to validate the model signature. Defaults to False.
+    logits
+        Whether the model outputs logits (True) or probabilities (False).
+        Defaults to True.
+
+    Returns
+    -------
+    ModelOutput
+        A `ModelOutput` object containing the class probabilities and extracted
+        features.
+
+    Raises
+    ------
+    ValueError
+        If the input array has the wrong shape or if the model signature is
+        invalid.
+    """
     if array.ndim == 1:
         array = array[np.newaxis, :]
 

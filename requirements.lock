@@ -4,7 +4,7 @@
 # last locked with the following flags:
 #   pre: false
 #   features: []
-#   all-features: false
+#   all-features: true
 #   with-sources: false
 #   generate-hashes: false
 
@@ -17,8 +17,6 @@ annotated-types==0.7.0
     # via pydantic
 astunparse==1.6.3
     # via tensorflow
-birdnetlib==0.17.2
-    # via audioclass
 certifi==2024.2.2
     # via netcdf4
     # via requests
@@ -28,10 +26,6 @@ cftime==1.6.3
     # via netcdf4
 charset-normalizer==3.3.2
     # via requests
-contourpy==1.2.1
-    # via matplotlib
-cycler==0.12.1
-    # via matplotlib
 cython==3.0.10
     # via soundevent
 dnspython==2.6.1
@@ -41,8 +35,6 @@ email-validator==2.1.1
 flatbuffers==24.3.25
     # via tensorflow
     # via tflite
-fonttools==4.52.4
-    # via matplotlib
 gast==0.5.4
     # via tensorflow
 google-pasta==0.2.0
@@ -58,8 +50,6 @@ idna==3.7
     # via requests
 keras==3.3.3
     # via tensorflow
-kiwisolver==1.4.5
-    # via matplotlib
 libclang==18.1.1
     # via tensorflow
 markdown==3.6
@@ -68,8 +58,6 @@ markdown-it-py==3.0.0
     # via rich
 markupsafe==2.1.5
     # via werkzeug
-matplotlib==3.9.0
-    # via birdnetlib
 mdurl==0.1.2
     # via markdown-it-py
 ml-dtypes==0.3.2
@@ -81,10 +69,8 @@ netcdf4==1.6.5
     # via audioclass
 numpy==1.24.4
     # via cftime
-    # via contourpy
     # via h5py
     # via keras
-    # via matplotlib
     # via ml-dtypes
     # via netcdf4
     # via opt-einsum
@@ -102,14 +88,11 @@ opt-einsum==3.3.0
 optree==0.11.0
     # via keras
 packaging==24.0
-    # via matplotlib
     # via tensorflow
     # via xarray
 pandas==2.2.2
     # via audioclass
     # via xarray
-pillow==10.3.0
-    # via matplotlib
 protobuf==4.25.3
     # via tensorboard
     # via tensorflow
@@ -122,20 +105,14 @@ pydantic==2.7.1
     # via soundevent
 pydantic-core==2.18.2
     # via pydantic
-pydub==0.25.1
-    # via birdnetlib
 pygments==2.18.0
     # via rich
-pyparsing==3.1.2
-    # via matplotlib
 python-dateutil==2.9.0.post0
-    # via matplotlib
     # via pandas
 pytz==2024.1
     # via pandas
 requests==2.32.2
     # via audioclass
-    # via birdnetlib
     # via tensorflow
 rich==13.7.1
     # via keras
@@ -184,8 +161,6 @@ tzdata==2024.1
     # via pandas
 urllib3==2.2.1
     # via requests
-watchdog==2.1.9
-    # via birdnetlib
 werkzeug==3.0.3
     # via tensorboard
 wheel==0.43.0
@@ -193,5 +168,4 @@ wheel==0.43.0
 wrapt==1.16.0
     # via tensorflow
 xarray==2024.5.0
-    # via audioclass
     # via soundevent

@@ -14,7 +14,7 @@ dependencies = [
     "requests>=2.32.2",
 ]
 readme = "README.md"
-requires-python = ">= 3.8"
+requires-python = ">= 3.9"
 license = { text = "MIT" }
 
 [project.optional-dependencies]
@@ -50,7 +50,7 @@ dev-dependencies = [
 
 [tool.ruff]
 line-length = 79
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -66,6 +66,7 @@ convention = "numpy"
 venvPath = "."
 venv = ".venv"
 exclude = [".venv"]
+pythonVersion = "3.9"
 
 [tool.coverage.run]
 branch = true

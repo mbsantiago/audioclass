@@ -7,15 +7,21 @@ to be used with audio classification models to process large amounts of audio
 data efficiently.
 """
 
+import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Generator, List, Optional, Tuple, TypeAlias
+from typing import Generator, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 from soundevent import audio, data
 
 from audioclass.constants import BATCH_SIZE
+
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
 
 __all__ = [
     "Batch",

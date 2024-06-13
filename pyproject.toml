@@ -1,6 +1,6 @@
 [project]
 name = "audioclass"
-version = "0.1.2"
+version = "0.1.3"
 description = "A Python package providing a common interface for running machine learning models for audio classification tasks."
 authors = [
     { name = "Santiago Martinez Balvanera", email = "santiago.mbal@gmail.com" },

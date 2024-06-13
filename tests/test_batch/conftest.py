@@ -1,6 +1,7 @@
 import datetime
 from pathlib import Path
 from typing import Callable, List, Tuple
+from uuid import uuid4
 
 import numpy as np
 import pandas as pd
@@ -14,9 +15,19 @@ def durations() -> List[float]:
 
 
 @pytest.fixture
-def file_list(random_wav_factory, durations: List[float]) -> List[Path]:
+def audio_dir(tmp_path: Path) -> Path:
+    return tmp_path / "audio"
+
+
+@pytest.fixture
+def file_list(
+    audio_dir: Path,
+    random_wav_factory,
+    durations: List[float],
+) -> List[Path]:
     return [
         random_wav_factory(
+            path=audio_dir / f"{uuid4().hex}.wav",
             duration=duration,
             samplerate=48000,
         )

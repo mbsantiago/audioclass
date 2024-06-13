@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import List
 
 import numpy as np
@@ -44,3 +45,26 @@ def test_tf_iterator_goes_through_all_frames(
         frames += array.shape[0]
 
     assert frames == total_frames
+
+
+def test_can_iterate_over_files_in_directory(
+    audio_dir: Path,
+    file_list: List[Path],
+):
+    iterator = TFDatasetIterator.from_directory(
+        audio_dir,
+        samplerate=48000,
+        input_samples=144000,
+        batch_size=4,
+    )
+
+    assert len(iterator.recordings) == len(file_list)
+
+    for array, recordings, frame in iterator:
+        assert isinstance(array, np.ndarray)
+        assert isinstance(recordings, list)
+        assert isinstance(frame, np.ndarray)
+        assert tuple(array.shape) == (4, 144000)
+        assert all(isinstance(rec, data.Recording) for rec in recordings)
+        assert all(rec.path in file_list for rec in recordings)
+        assert all(rec.path.exists() for rec in recordings)

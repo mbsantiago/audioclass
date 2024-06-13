@@ -213,7 +213,7 @@ six==1.16.0
     # via python-dateutil
     # via tensorboard
     # via tensorflow
-soundevent==2.0.0
+soundevent==2.0.1
     # via audioclass
 soundfile==0.12.1
     # via soundevent

@@ -208,7 +208,6 @@ class BaseIterator(ABC):
             samplerate=samplerate,
             input_samples=input_samples,
             batch_size=batch_size,
-            audio_dir=directory,
         )
 
     @classmethod

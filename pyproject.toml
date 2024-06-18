@@ -67,6 +67,7 @@ convention = "numpy"
 venvPath = "."
 venv = ".venv"
 exclude = [".venv"]
+include = ["src"]
 pythonVersion = "3.9"
 
 [tool.coverage.run]

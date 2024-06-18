@@ -1,13 +1,13 @@
 import datetime
 
 import pytest
+
 pytest.importorskip("tensorflow")
 
 import numpy as np
 import xarray as xr
 from audioclass.models.perch import Perch
 from soundevent import data
-
 
 
 @pytest.fixture(scope="module")

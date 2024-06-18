@@ -33,7 +33,7 @@ lint-pyright:
 .PHONY: lint-ruff
 lint-ruff:
 	$(ENV_PREFIX)ruff check $(PROJECT_NAME)/
-	$(ENV_PREFIX)ruff check tests/ --ignore "D"
+	$(ENV_PREFIX)ruff check tests/ --ignore "D,E402"
 
 .PHONY: lint
 lint: lint-pyright lint-ruff

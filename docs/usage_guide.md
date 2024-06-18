@@ -19,6 +19,12 @@ models:
   wide range of bird species and is suitable for biodiversity monitoring and
   ecological research.
 
+- [**BirdNETAnalyzer:**][audioclass.models.birdnet_analyzer.BirdNETAnalyzer] A
+  TensorFlow-based model designed for bird sound classification, offering
+  potential GPU acceleration. BirdNETAnalyzer provides a similar functionality to
+  the existing BirdNET model but is optimized for scenarios where computational
+  resources are abundant and inference speed is a priority.
+
 - [**Perch:**][audioclass.models.perch.Perch] A TensorFlow Hub model developed
   by Google Research for bird sound classification. Perch is trained on a large
   dataset of bird vocalizations and is known for its quality embeddings.

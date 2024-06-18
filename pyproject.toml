@@ -21,6 +21,7 @@ license = { text = "MIT" }
 tensorflow = ["tensorflow>=2.0", "tensorflow-hub>=0.16.1"]
 tflite = ["tflite-runtime>=2.14.0", "numpy<2"]
 birdnet = ["audioclass[tflite]"]
+birdnet_analyzer = ["audioclass[tensorflow]"]
 perch = ["audioclass[tensorflow]"]
 all = ["audioclass[tensorflow]"]
 

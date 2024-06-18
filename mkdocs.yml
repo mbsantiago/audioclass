@@ -12,6 +12,7 @@ nav:
           - reference/models/tensorflow.md
           - reference/models/tflite.md
           - reference/models/birdnet.md
+          - reference/models/birdnet_analyzer.md
           - reference/models/perch.md
       - postprocess: reference/postprocess.md
       - batch:

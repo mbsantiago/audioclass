@@ -46,6 +46,14 @@ test-watch:    ## Run tests and generate coverage report.
 test:    ## Run tests and generate coverage report.
 	$(ENV_PREFIX)pytest -s -vvv -l --tb=long --maxfail=1 tests/
 
+.PHONY: nox
+nox:
+	$(ENV_PREFIX)nox
+
+.PHONY: nox-lint
+nox-lint:
+	$(ENV_PREFIX)nox -s lint
+
 .PHONY: coverage
 coverage:    ## Run tests and generate coverage report.
 	$(ENV_PREFIX)coverage run -m pytest tests/

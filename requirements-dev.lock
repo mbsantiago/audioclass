@@ -15,6 +15,8 @@ absl-py==2.1.0
     # via tensorflow
 annotated-types==0.7.0
     # via pydantic
+argcomplete==3.4.0
+    # via nox
 astunparse==1.6.3
     # via tensorflow
 babel==2.15.0
@@ -34,17 +36,22 @@ click==8.1.7
 colorama==0.4.6
     # via griffe
     # via mkdocs-material
+colorlog==6.8.2
+    # via nox
 coverage==7.5.3
     # via pytest-cov
 cython==3.0.10
     # via soundevent
+distlib==0.3.8
+    # via virtualenv
 dnspython==2.6.1
     # via email-validator
 email-validator==2.1.1
     # via soundevent
+filelock==3.15.1
+    # via virtualenv
 flatbuffers==24.3.25
     # via tensorflow
-    # via tflite
 gast==0.5.4
     # via tensorflow
 ghp-import==2.1.0
@@ -116,6 +123,7 @@ netcdf4==1.6.5
     # via audioclass
 nodeenv==1.9.0
     # via pyright
+nox==2024.4.15
 numpy==1.24.4
     # via cftime
     # via h5py
@@ -129,7 +137,6 @@ numpy==1.24.4
     # via tensorboard
     # via tensorflow
     # via tensorflow-hub
-    # via tflite
     # via tflite-runtime
     # via xarray
 opt-einsum==3.3.0
@@ -138,6 +145,7 @@ optree==0.11.0
     # via keras
 packaging==24.0
     # via mkdocs
+    # via nox
     # via pytest
     # via tensorflow
     # via xarray
@@ -151,6 +159,7 @@ pathspec==0.12.1
 platformdirs==4.2.2
     # via mkdocs-get-deps
     # via mkdocstrings
+    # via virtualenv
 pluggy==1.5.0
     # via pytest
 protobuf==4.25.3
@@ -232,8 +241,6 @@ termcolor==2.4.0
     # via tensorflow
 tf-keras==2.16.0
     # via tensorflow-hub
-tflite==2.10.0
-    # via audioclass
 tflite-runtime==2.14.0
     # via audioclass
 tqdm==4.66.4
@@ -247,6 +254,8 @@ tzdata==2024.1
     # via pandas
 urllib3==2.2.1
     # via requests
+virtualenv==20.26.2
+    # via nox
 watchdog==4.0.1
     # via mkdocs
 werkzeug==3.0.3

@@ -1,8 +1,7 @@
 import numpy as np
 import pytest
 from audioclass.models.birdnet import BirdNET
-from audioclass.models.tflite import Signature, process_array
-from tflite_runtime.interpreter import Interpreter
+from audioclass.models.tflite import Interpreter, Signature, process_array
 
 
 @pytest.fixture
@@ -12,7 +11,7 @@ def birdnet_model() -> BirdNET:
 
 @pytest.fixture
 def interpreter(birdnet_model: BirdNET) -> Interpreter:
-    return birdnet_model.interpreter
+    return birdnet_model.interpreter  # type: ignore
 
 
 @pytest.fixture
@@ -20,6 +19,7 @@ def signature(birdnet_model: BirdNET) -> Signature:
     return birdnet_model.signature
 
 
+@pytest.mark.tflite
 def test_process_array_can_process_1d_arrays(
     interpreter: Interpreter, signature: Signature
 ):
@@ -27,6 +27,7 @@ def test_process_array_can_process_1d_arrays(
     process_array(interpreter, signature, array)
 
 
+@pytest.mark.tflite
 def test_process_array_fails_with_incorrect_size(
     interpreter: Interpreter, signature: Signature
 ):
@@ -36,6 +37,7 @@ def test_process_array_fails_with_incorrect_size(
         process_array(interpreter, signature, array)
 
 
+@pytest.mark.tflite
 def test_process_array_fails_for_3d_array(
     interpreter: Interpreter, signature: Signature
 ):
@@ -45,6 +47,7 @@ def test_process_array_fails_for_3d_array(
         process_array(interpreter, signature, array)
 
 
+@pytest.mark.tflite
 def test_can_process_arrays_with_dynamic_batch_size(
     interpreter: Interpreter, signature: Signature
 ):

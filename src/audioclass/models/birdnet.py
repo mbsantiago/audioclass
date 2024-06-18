@@ -29,10 +29,10 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 from soundevent import data
-from tflite_runtime.interpreter import Interpreter
 
 from audioclass.constants import DEFAULT_THRESHOLD
 from audioclass.models.tflite import (
+    Interpreter,
     Signature,
     TFLiteModel,
     load_model,
@@ -116,7 +116,7 @@ class BirdNET(TFLiteModel):
         tags = load_tags(labels_path, common_name=common_name)
         return cls(
             interpreter=interpreter,
-            signature=get_signature(interpreter),
+            signature=get_signature(interpreter),  # type: ignore
             tags=tags,
             confidence_threshold=confidence_threshold,
             samplerate=samplerate,

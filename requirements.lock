@@ -34,7 +34,6 @@ email-validator==2.1.1
     # via soundevent
 flatbuffers==24.3.25
     # via tensorflow
-    # via tflite
 gast==0.5.4
     # via tensorflow
 google-pasta==0.2.0
@@ -80,7 +79,6 @@ numpy==1.24.4
     # via tensorboard
     # via tensorflow
     # via tensorflow-hub
-    # via tflite
     # via tflite-runtime
     # via xarray
 opt-einsum==3.3.0
@@ -146,8 +144,6 @@ termcolor==2.4.0
     # via tensorflow
 tf-keras==2.16.0
     # via tensorflow-hub
-tflite==2.10.0
-    # via audioclass
 tflite-runtime==2.14.0
     # via audioclass
 tqdm==4.66.4

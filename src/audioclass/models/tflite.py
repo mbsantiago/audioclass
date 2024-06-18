@@ -13,15 +13,20 @@ from typing import List, Optional
 import numpy as np
 from numpy.typing import DTypeLike
 from soundevent import data
-from tflite_runtime.interpreter import Interpreter
 
 from audioclass.models.base import ClipClassificationModel, ModelOutput
 from audioclass.utils import flat_sigmoid
+
+try:
+    from tensorflow._api.v2.lite import Interpreter
+except ImportError:
+    from tflite_runtime.interpreter import Interpreter  # type: ignore
 
 __all__ = [
     "load_model",
     "Signature",
     "TFLiteModel",
+    "Interpreter",
 ]
 
 

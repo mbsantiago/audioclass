@@ -19,10 +19,10 @@ license = { text = "MIT" }
 
 [project.optional-dependencies]
 tensorflow = ["tensorflow>=2.0", "tensorflow-hub>=0.16.1"]
-tflite = ["tflite>=2.0", "tflite-runtime>=2.14.0"]
+tflite = ["tflite-runtime>=2.14.0", "numpy<2"]
 birdnet = ["audioclass[tflite]"]
 perch = ["audioclass[tensorflow]"]
-all = ["audioclass[birdnet]", "audioclass[perch]"]
+all = ["audioclass[tensorflow]"]
 
 [build-system]
 requires = ["hatchling"]
@@ -46,6 +46,7 @@ dev-dependencies = [
     "mkdocs>=1.6.0",
     "mkdocstrings[python]>=0.25.1",
     "mkdocs-material>=9.5.25",
+    "nox>=2024.4.15",
 ]
 
 [tool.ruff]
@@ -72,3 +73,6 @@ pythonVersion = "3.9"
 branch = true
 source = ["src/audioclass"]
 command_line = "-m pytest"
+
+[tool.pytest.ini_options]
+markers = ["tflite", "tensorflow"]

@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 
 import pytest
+
 pytest.importorskip("tensorflow")
 
 import numpy as np

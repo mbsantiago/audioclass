@@ -1,11 +1,15 @@
 from pathlib import Path
 from typing import List
 
+import pytest
+pytest.importorskip("tensorflow")
+
 import numpy as np
 from audioclass.batch.tensorflow import TFDatasetIterator
 from soundevent import data
 
 
+@pytest.mark.tensorflow
 def test_tf_iterator(recordings: List[data.Recording]):
     iterator = TFDatasetIterator(
         recordings,
@@ -20,6 +24,7 @@ def test_tf_iterator(recordings: List[data.Recording]):
         assert all(isinstance(rec, data.Recording) for rec in recordings)
 
 
+@pytest.mark.tensorflow
 def test_tf_iterator_goes_through_all_frames(
     recordings: List[data.Recording],
     durations: List[float],
@@ -47,6 +52,7 @@ def test_tf_iterator_goes_through_all_frames(
     assert frames == total_frames
 
 
+@pytest.mark.tensorflow
 def test_can_iterate_over_files_in_directory(
     audio_dir: Path,
     file_list: List[Path],

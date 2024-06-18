@@ -31,3 +31,11 @@ def test_tensorflow_only(session):
     session.install("pytest")
     session.install("pytest-mock")
     session.run("pytest", "-m", "tensorflow")
+
+@nox.session(python=["3.9", "3.10", "3.11"], venv_backend="uv")
+def lint(session):
+    session.install(".[all]")
+    session.install("pyright")
+    session.install("ruff")
+    session.run("pyright", "src")
+    session.run("ruff", "check", "src")

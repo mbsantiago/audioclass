@@ -50,6 +50,10 @@ test:    ## Run tests and generate coverage report.
 nox:
 	$(ENV_PREFIX)nox
 
+.PHONY: nox-lint
+nox-lint:
+	$(ENV_PREFIX)nox -s lint
+
 .PHONY: coverage
 coverage:    ## Run tests and generate coverage report.
 	$(ENV_PREFIX)coverage run -m pytest tests/

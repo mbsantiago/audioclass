@@ -20,7 +20,7 @@ from audioclass.utils import flat_sigmoid
 try:
     from tensorflow._api.v2.lite import Interpreter
 except ImportError:
-    from tflite_runtime.interpreter import Interpreter
+    from tflite_runtime.interpreter import Interpreter  # type: ignore
 
 __all__ = [
     "load_model",

@@ -31,7 +31,7 @@ This value corresponds to the sample rate used by the BirdNET model.
 
 SAVED_MODEL_PATH = DATA_DIR / "BirdNET_GLOBAL_6K_V2.4"
 
-LABELS_PATH = "https://github.com/kahst/BirdNET-Analyzer/raw/main/checkpoints/V2.4/BirdNET_GLOBAL_6K_V2.4_Labels.txt"
+LABELS_PATH = "https://raw.githubusercontent.com/kahst/BirdNET-Analyzer/refs/heads/main/birdnet_analyzer/checkpoints/V2.4/BirdNET_GLOBAL_6K_V2.4_Labels.txt"
 """Default path to the BirdNET labels file."""
 
 

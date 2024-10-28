@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+
 from audioclass.models.birdnet import BirdNET
 from audioclass.models.tflite import Interpreter, Signature, process_array
 

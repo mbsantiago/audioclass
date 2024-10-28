@@ -4,8 +4,9 @@ from typing import List
 
 import numpy as np
 import pytest
-from audioclass.batch import SimpleIterator
 from soundevent import data
+
+from audioclass.batch import SimpleIterator
 
 
 @pytest.fixture

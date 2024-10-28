@@ -3,8 +3,9 @@ import datetime
 import numpy as np
 import pytest
 import xarray as xr
-from audioclass.models.birdnet import BirdNET
 from soundevent import data
+
+from audioclass.models.birdnet import BirdNET
 
 
 @pytest.mark.tflite

@@ -8,7 +8,7 @@ the model's input and output specifications.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import numpy as np
 from numpy.typing import DTypeLike
@@ -131,7 +131,7 @@ class TFLiteModel(ClipClassificationModel):
 
 
 def load_model(
-    path: Path,
+    path: Union[Path, str],
     num_threads: Optional[int] = None,
 ) -> Interpreter:
     """
@@ -150,7 +150,11 @@ def load_model(
     Interpreter
         The TensorFlow Lite interpreter object.
     """
-    interpreter = Interpreter(model_path=str(path), num_threads=num_threads)
+    interpreter = Interpreter(
+        model_path=str(path),
+        num_threads=num_threads,
+        experimental_preserve_all_tensors=True,
+    )
     interpreter.allocate_tensors()
     return interpreter
 
@@ -252,6 +256,7 @@ def process_array(
     interpreter.set_tensor(signature.input_index, array)
     interpreter.invoke()
     class_probs = interpreter.get_tensor(signature.classification_index)
+
     features = interpreter.get_tensor(signature.feature_index)
 
     if logits:

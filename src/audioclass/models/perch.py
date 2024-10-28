@@ -141,6 +141,22 @@ def get_signature(callable: Callable) -> Signature:
     )
 
 
+ebird2021_def = """The eBird 2021 taxonomy is a global list of bird species used for reporting sightings in eBird.
+It includes all species and subspecies, and is updated annually to reflect the latest ornithological knowledge.
+This comprehensive list is used across various Cornell Lab projects and is vital for data analysis,
+bird identification, and citizen science initiatives.
+
+For more information and to download the taxonomy, visit the eBird website.
+"""
+
+ebird2021 = data.Term(
+    uri="https://www.birds.cornell.edu/clementschecklist/wp-content/uploads/2021/08/eBird_Taxonomy_v2021.csv",
+    label="ebird2021",
+    name="ebird:2021speciescodes",
+    definition=ebird2021_def,
+)
+
+
 def load_tags(path: Union[Path, str] = TAGS_PATH) -> List[data.Tag]:
     """Load Perch labels from a file.
 
@@ -157,4 +173,4 @@ def load_tags(path: Union[Path, str] = TAGS_PATH) -> List[data.Tag]:
     """
     path = load_artifact(path)
     tags = path.read_text().splitlines()[1:]
-    return [data.Tag(key="ebird2021", value=tag) for tag in tags]
+    return [data.Tag(term=ebird2021, value=tag) for tag in tags]

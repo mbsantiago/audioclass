@@ -3,8 +3,11 @@ import datetime
 import numpy as np
 import pytest
 import xarray as xr
-from audioclass.models.birdnet_analyzer import BirdNETAnalyzer
 from soundevent import data
+
+pytest.importorskip("tensorflow")
+
+from audioclass.models.birdnet_analyzer import BirdNETAnalyzer
 
 
 @pytest.mark.tensorflow

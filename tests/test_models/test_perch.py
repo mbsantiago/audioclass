@@ -6,8 +6,9 @@ pytest.importorskip("tensorflow")
 
 import numpy as np
 import xarray as xr
-from audioclass.models.perch import Perch
 from soundevent import data
+
+from audioclass.models.perch import Perch
 
 
 @pytest.fixture(scope="module")

@@ -10,7 +10,7 @@ from typing import List, Union
 
 import numpy as np
 import tensorflow as tf
-from soundevent import data
+from soundevent import data, terms
 
 from audioclass.constants import DATA_DIR, DEFAULT_THRESHOLD
 from audioclass.models.tensorflow import Signature, TensorflowModel
@@ -31,7 +31,7 @@ This value corresponds to the sample rate used by the BirdNET model.
 
 SAVED_MODEL_PATH = DATA_DIR / "BirdNET_GLOBAL_6K_V2.4"
 
-LABELS_PATH = "https://github.com/kahst/BirdNET-Analyzer/raw/main/checkpoints/V2.4/BirdNET_GLOBAL_6K_V2.4_Labels.txt"
+LABELS_PATH = "https://raw.githubusercontent.com/kahst/BirdNET-Analyzer/refs/heads/main/birdnet_analyzer/checkpoints/V2.4/BirdNET_GLOBAL_6K_V2.4_Labels.txt"
 """Default path to the BirdNET labels file."""
 
 
@@ -76,10 +76,10 @@ class BirdNETAnalyzer(TensorflowModel):
 
         @tf.function(
             input_signature=[
-                tf.TensorSpec(  # type: ignore
-                    shape=[None, 144000],
-                    dtype=tf.float32,
-                    name="inputs",
+                tf.TensorSpec(
+                    shape=[None, 144000],  # type: ignore
+                    dtype=tf.float32,  # type: ignore
+                    name="inputs",  # type: ignore
                 )
             ]
         )
@@ -131,7 +131,7 @@ def load_tags(
         labels = f.read().splitlines()
 
     index = 1 if common_name else 0
-    key = "common_name" if common_name else "scientific_name"
+    term = terms.common_name if common_name else terms.scientific_name
     return [
-        data.Tag(key=key, value=label.split("_")[index]) for label in labels
+        data.Tag(term=term, value=label.split("_")[index]) for label in labels
     ]

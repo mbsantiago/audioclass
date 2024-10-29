@@ -1,12 +1,13 @@
 import numpy as np
 import pytest
+from soundevent import audio, data
+
 from audioclass.preprocess import (
     load_clip,
     load_recording,
     resample_audio,
     stack_array,
 )
-from soundevent import audio, data
 
 
 def test_stack_array_fails_if_not_one_dimensional():

@@ -2,17 +2,18 @@ import datetime
 
 import numpy as np
 import pytest
+from soundevent import data
+
 from audioclass.postprocess import (
     convert_to_features_array,
     convert_to_predicted_tags_list,
     convert_to_probabilities_array,
 )
-from soundevent import data
 
 
 def test_fails_to_convert_to_tags_list_if_size_mismatch():
     class_probs = np.array([[0.5, 0.5]])
-    tags = [data.Tag(key="test", value="test")]
+    tags = [data.Tag(term=data.term_from_key("test"), value="test")]
 
     with pytest.raises(ValueError, match="(1 != 2)"):
         convert_to_predicted_tags_list(class_probs, tags)

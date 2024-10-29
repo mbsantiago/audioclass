@@ -6,8 +6,9 @@ import pytest
 pytest.importorskip("tensorflow")
 
 import numpy as np
-from audioclass.batch.tensorflow import TFDatasetIterator
 from soundevent import data
+
+from audioclass.batch.tensorflow import TFDatasetIterator
 
 
 @pytest.mark.tensorflow

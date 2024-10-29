@@ -53,7 +53,7 @@ def convert_to_features_list(
     """
     return [
         [
-            data.Feature(name=f"{prefix}{i}", value=feat)
+            data.Feature(term=data.term_from_key(f"{prefix}{i}"), value=feat)
             for i, feat in enumerate(feats)
         ]
         for feats in features

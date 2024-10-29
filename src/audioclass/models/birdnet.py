@@ -28,7 +28,7 @@ For further details, please visit the official
 from pathlib import Path
 from typing import List, Optional, Union
 
-from soundevent import data
+from soundevent import data, terms
 
 from audioclass.constants import DEFAULT_THRESHOLD
 from audioclass.models.tflite import (
@@ -54,10 +54,10 @@ SAMPLERATE = 48_000
 This value corresponds to the sample rate used by the BirdNET model.
 """
 
-MODEL_PATH = "https://github.com/kahst/BirdNET-Analyzer/raw/main/checkpoints/V2.4/BirdNET_GLOBAL_6K_V2.4_Model_FP32.tflite"
+MODEL_PATH: str = "https://github.com/kahst/BirdNET-Analyzer/raw/refs/heads/main/birdnet_analyzer/checkpoints/V2.4/BirdNET_GLOBAL_6K_V2.4_Model_FP32.tflite"
 """Default path to the BirdNET TensorFlow Lite model file."""
 
-LABELS_PATH = "https://github.com/kahst/BirdNET-Analyzer/raw/main/checkpoints/V2.4/BirdNET_GLOBAL_6K_V2.4_Labels.txt"
+LABELS_PATH = "https://raw.githubusercontent.com/kahst/BirdNET-Analyzer/refs/heads/main/birdnet_analyzer/checkpoints/V2.4/BirdNET_GLOBAL_6K_V2.4_Labels.txt"
 """Default path to the BirdNET labels file."""
 
 
@@ -151,9 +151,9 @@ def load_tags(
         labels = f.read().splitlines()
 
     index = 1 if common_name else 0
-    key = "common_name" if common_name else "scientific_name"
+    term = terms.common_name if common_name else terms.scientific_name
     return [
-        data.Tag(key=key, value=label.split("_")[index]) for label in labels
+        data.Tag(term=term, value=label.split("_")[index]) for label in labels
     ]
 
 

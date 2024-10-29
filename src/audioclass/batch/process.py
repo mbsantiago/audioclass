@@ -72,7 +72,10 @@ def process_iterable(
                 data.ClipPrediction(
                     clip=clip,
                     features=[
-                        data.Feature(name=f"{name}_{i}", value=feat)
+                        data.Feature(
+                            term=data.term_from_key(f"{name}_{i}"),
+                            value=feat,
+                        )
                         for i, feat in enumerate(feats)
                     ],
                     tags=[

@@ -21,8 +21,13 @@ install:          ## Install the project in dev mode.
 	@echo "Don't forget to run 'make virtualenv' if you got errors."
 	$(ENV_PREFIX)pip install -e .[test]
 
+.PHONY: fix-imports
+fix:
+	$(ENV_PREFIX)ruff check --select I --fix $(PROJECT_NAME)/
+	$(ENV_PREFIX)ruff check --select I --fix tests/
+
 .PHONY: fmt
-fmt:              ## Format code using black & isort.
+fmt: fix-imports  ## Format code using black & isort.
 	$(ENV_PREFIX)ruff format $(PROJECT_NAME)/
 	$(ENV_PREFIX)ruff format tests/
 
@@ -48,7 +53,7 @@ test:    ## Run tests and generate coverage report.
 
 .PHONY: nox
 nox:
-	$(ENV_PREFIX)nox
+	$(ENV_PREFIX)nox --default-venv-backend uv -x
 
 .PHONY: nox-lint
 nox-lint:

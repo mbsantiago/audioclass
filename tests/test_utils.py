@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+
 from audioclass.models.birdnet import LABELS_PATH, MODEL_PATH
 from audioclass.utils import _hash_url, _is_url, load_artifact
 

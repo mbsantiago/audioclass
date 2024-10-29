@@ -68,4 +68,4 @@ def process_array() -> Callable[[np.ndarray], Tuple[np.ndarray, np.ndarray]]:
 
 @pytest.fixture
 def tags() -> List[data.Tag]:
-    return [data.Tag(key="test", value="test")]
+    return [data.Tag(term=data.term_from_key("test"), value="test")]

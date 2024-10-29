@@ -1,5 +1,6 @@
-from audioclass.batch import SimpleIterator, process_iterable
 from soundevent import data
+
+from audioclass.batch import SimpleIterator, process_iterable
 
 
 def test_process_iterable_outputs_clip_predictions(

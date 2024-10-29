@@ -3,12 +3,13 @@ from typing import List
 
 import pandas as pd
 import pytest
+from soundevent import data
+
 from audioclass.batch.base import (
     recordings_from_dataframe,
     recordings_from_directory,
     recordings_from_files,
 )
-from soundevent import data
 
 
 def test_from_dataframe_checks_columns(

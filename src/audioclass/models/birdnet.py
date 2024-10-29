@@ -79,6 +79,7 @@ class BirdNET(TFLiteModel):
         samplerate: int = SAMPLERATE,
         name: str = "BirdNET",
         common_name: bool = False,
+        batch_size: int = 8,
     ) -> "BirdNET":
         """Load a BirdNET model from a file or URL.
 
@@ -104,6 +105,8 @@ class BirdNET(TFLiteModel):
         common_name
             Whether to use common names for bird species instead of scientific
             names. Defaults to False.
+        batch_size
+            The number of samples to process in each batch. Defaults to 8.
 
         Returns
         -------
@@ -121,6 +124,7 @@ class BirdNET(TFLiteModel):
             confidence_threshold=confidence_threshold,
             samplerate=samplerate,
             name=name,
+            batch_size=batch_size,
         )
 
 

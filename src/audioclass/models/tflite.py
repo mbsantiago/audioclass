@@ -73,7 +73,7 @@ class TFLiteModel(ClipClassificationModel):
         samplerate: int,
         name: str,
         logits: bool = True,
-        batch_size: int = 32,
+        batch_size: int = 8,
     ):
         """Initialize a TFLiteModel.
 
@@ -96,7 +96,7 @@ class TFLiteModel(ClipClassificationModel):
             Defaults to True.
         batch_size
             The maximum number of frames to process in each batch. Defaults to
-            32.
+            8.
         """
         self.interpreter = interpreter
         self.tags = tags

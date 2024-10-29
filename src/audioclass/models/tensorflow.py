@@ -66,7 +66,7 @@ class TensorflowModel(ClipClassificationModel):
         samplerate: int,
         name: str,
         logits: bool = True,
-        batch_size: int = 32,
+        batch_size: int = 8,
     ):
         """Initialize a TensorflowModel.
 
@@ -89,7 +89,7 @@ class TensorflowModel(ClipClassificationModel):
             Defaults to True.
         batch_size
             The maximum number of frames to process in each batch.
-            Defaults to 32.
+            Defaults to 8.
         """
         self.callable = callable
         self.tags = tags

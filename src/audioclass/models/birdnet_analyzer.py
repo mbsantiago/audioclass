@@ -50,6 +50,8 @@ class BirdNETAnalyzer(TensorflowModel):
         confidence_threshold: float = DEFAULT_THRESHOLD,
         samplerate: int = SAMPLERATE,
         name: str = "BirdNET",
+        common_name: bool = False,
+        batch_size: int = 8,
     ):
         """Load a BirdNET model from a saved model directory.
 
@@ -71,7 +73,7 @@ class BirdNETAnalyzer(TensorflowModel):
         BirdNETAnalyzer
             An instance of the BirdNET model.
         """
-        tags = load_tags(tags_url)
+        tags = load_tags(tags_url, common_name=common_name)
         model = tf.saved_model.load(model_url)
 
         @tf.function(
@@ -101,6 +103,7 @@ class BirdNETAnalyzer(TensorflowModel):
             confidence_threshold=confidence_threshold,
             samplerate=samplerate,
             name=name,
+            batch_size=batch_size,
         )
 
 

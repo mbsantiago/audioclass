@@ -62,21 +62,28 @@ class Perch(TensorflowModel):
         confidence_threshold: float = DEFAULT_THRESHOLD,
         samplerate: int = SAMPLERATE,
         name: str = "Perch",
+        batch_size: int = 8,
     ):
         """Load a Perch model from a URL.
 
         Parameters
         ----------
         model_url
-            The URL of the TensorFlow Hub model. Defaults to the official Perch model URL.
+            The URL of the TensorFlow Hub model. Defaults to the official Perch
+            model URL.
         tags_url
-            The URL or path to the file containing the labels. Defaults to the tags file included in the package.
+            The URL or path to the file containing the labels. Defaults to the
+            tags file included in the package.
         confidence_threshold
-            The minimum confidence threshold for making predictions. Defaults to `DEFAULT_THRESHOLD`.
+            The minimum confidence threshold for making predictions. Defaults
+            to `DEFAULT_THRESHOLD`.
         samplerate
-            The sample rate of the audio data expected by the model (in Hz). Defaults to `SAMPLERATE`.
+            The sample rate of the audio data expected by the model (in Hz).
+            Defaults to `SAMPLERATE`.
         name
             The name of the model. Defaults to "Perch".
+        batch_size
+            The batch size used for processing audio data. Defaults to 8.
 
         Returns
         -------
@@ -94,6 +101,7 @@ class Perch(TensorflowModel):
             confidence_threshold=confidence_threshold,
             samplerate=samplerate,
             name=name,
+            batch_size=batch_size,
         )
 
 

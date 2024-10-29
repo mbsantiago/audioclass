@@ -82,7 +82,7 @@ class ClipClassificationModel(ABC):
     tags: List[data.Tag]
     """The list of tags that the model can predict."""
 
-    batch_size: int = 32
+    batch_size: int = 8
     """The maximum number of framces to process in each batch."""
 
     @abstractmethod

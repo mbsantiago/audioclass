@@ -65,4 +65,8 @@ class TFDatasetIterator(BaseIterator):
         )
 
         for batch_data, (frame, index) in dataset.as_numpy_iterator():  # type: ignore
-            yield batch_data, [self.recordings[int(i)] for i in index], frame
+            yield (
+                batch_data,
+                [self.recordings[int(i)] for i in index[:, 0]],
+                frame,
+            )

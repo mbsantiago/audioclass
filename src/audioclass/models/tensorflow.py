@@ -66,6 +66,7 @@ class TensorflowModel(ClipClassificationModel):
         samplerate: int,
         name: str,
         logits: bool = True,
+        batch_size: int = 8,
     ):
         """Initialize a TensorflowModel.
 
@@ -86,6 +87,9 @@ class TensorflowModel(ClipClassificationModel):
         logits
             Whether the model outputs logits (True) or probabilities (False).
             Defaults to True.
+        batch_size
+            The maximum number of frames to process in each batch.
+            Defaults to 8.
         """
         self.callable = callable
         self.tags = tags
@@ -96,6 +100,7 @@ class TensorflowModel(ClipClassificationModel):
         self.input_samples = signature.input_length
         self.num_classes = len(tags)
         self.logits = logits
+        self.batch_size = batch_size
 
         _validate_signature(self.callable, self.signature)
 
@@ -113,6 +118,18 @@ class TensorflowModel(ClipClassificationModel):
         ModelOutput
             A `ModelOutput` object containing the class probabilities and
             extracted features.
+
+        Note
+        ----
+        This is a low-level method that requires manual batching of
+        the input audio array. If you prefer a higher-level
+        interface that handles batching automatically, consider
+        using `process_file`, `process_recording`, or `process_clip`
+        instead.
+
+        Be aware that passing an array with a large batch size may
+        exceed available device memory and cause the process to
+        crash.
         """
         return process_array(
             self.callable,

@@ -382,7 +382,7 @@ def recordings_from_dataframe(
         path = Path(row[path_col])  # type: ignore
         recorded_on = row.get(recorded_on_col)
         tags = [
-            data.Tag(key=col, value=row[col])  # type: ignore
+            data.Tag(term=data.term_from_key(col), value=row[col])  # type: ignore
             for col in additional_cols
         ]
         recording = data.Recording.from_file(

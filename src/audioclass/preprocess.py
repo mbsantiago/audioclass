@@ -178,6 +178,11 @@ def stack_array(
     np.ndarray
         A 2D array of shape (num_buffers, buffer_size) containing the stacked
         buffers.
+
+    Raises
+    ------
+    ValueError
+        If the input array has more than one dimension.
     """
     if arr.ndim != 1:
         raise ValueError(

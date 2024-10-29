@@ -22,6 +22,7 @@ from audioclass.postprocess import (
     convert_to_predicted_tags_list,
 )
 from audioclass.preprocess import load_clip
+from audioclass.utils import batched
 
 __all__ = [
     "ModelOutput",
@@ -80,6 +81,9 @@ class ClipClassificationModel(ABC):
 
     tags: List[data.Tag]
     """The list of tags that the model can predict."""
+
+    batch_size: int = 8
+    """The maximum number of framces to process in each batch."""
 
     @abstractmethod
     def process_array(self, array: np.ndarray) -> ModelOutput:
@@ -223,7 +227,16 @@ class ClipClassificationModel(ABC):
             samplerate=self.samplerate,
             buffer_size=self.input_samples,
         )
-        class_probs, features = self.process_array(array)
+
+        class_probs = []
+        features = []
+        for batch in batched(array, self.batch_size):
+            probs, feats = self.process_array(batch)
+            class_probs.append(probs)
+            features.append(feats)
+
+        class_probs = np.concatenate(class_probs)
+        features = np.concatenate(features)
 
         if fmt == "soundevent":
             return self._convert_to_soundevent(clip, class_probs, features)

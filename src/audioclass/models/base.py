@@ -99,7 +99,7 @@ class ClipClassificationModel(ABC):
         """
 
     @overload
-    def process_file(  # pragma: no cover
+    def process_file(  # type: ignore # pragma: no cover
         self,
         path: Path,
         fmt: Literal["soundevent"] = "soundevent",
@@ -142,7 +142,7 @@ class ClipClassificationModel(ABC):
         return self.process_recording(recording, fmt=fmt)
 
     @overload
-    def process_recording(  # pragma: no cover
+    def process_recording(  # type: ignore # pragma: no cover
         self,
         recording: data.Recording,
         fmt: Literal["soundevent"] = "soundevent",
@@ -184,14 +184,14 @@ class ClipClassificationModel(ABC):
         return self.process_clip(clip, fmt=fmt)
 
     @overload
-    def process_clip(
+    def process_clip(  # type: ignore # pragma: no cover
         self,
         clip: data.Clip,
         fmt: Literal["soundevent"] = "soundevent",
     ) -> List[data.ClipPrediction]: ...
 
     @overload
-    def process_clip(
+    def process_clip(  # pragma: no cover
         self,
         clip: data.Clip,
         fmt: Literal["dataset"] = "dataset",

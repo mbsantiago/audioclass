@@ -10,7 +10,7 @@ from typing import List, Union
 
 import numpy as np
 import tensorflow as tf
-from soundevent import data
+from soundevent import data, terms
 
 from audioclass.constants import DATA_DIR, DEFAULT_THRESHOLD
 from audioclass.models.tensorflow import Signature, TensorflowModel
@@ -76,10 +76,10 @@ class BirdNETAnalyzer(TensorflowModel):
 
         @tf.function(
             input_signature=[
-                tf.TensorSpec(  # type: ignore
-                    shape=[None, 144000],
-                    dtype=tf.float32,
-                    name="inputs",
+                tf.TensorSpec(
+                    shape=[None, 144000],  # type: ignore
+                    dtype=tf.float32,  # type: ignore
+                    name="inputs",  # type: ignore
                 )
             ]
         )
@@ -131,7 +131,7 @@ def load_tags(
         labels = f.read().splitlines()
 
     index = 1 if common_name else 0
-    key = "common_name" if common_name else "scientific_name"
+    term = terms.common_name if common_name else terms.scientific_name
     return [
-        data.Tag(key=key, value=label.split("_")[index]) for label in labels
+        data.Tag(term=term, value=label.split("_")[index]) for label in labels
     ]

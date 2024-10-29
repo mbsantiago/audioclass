@@ -99,3 +99,11 @@ def test_birdnet_can_process_recording_with_metadata(random_wav_factory):
     assert "latitude" in clip_predictions
     assert "longitude" in clip_predictions
     assert "recorded_on" in clip_predictions
+
+
+@pytest.mark.tflite
+def test_birdnet_can_process_a_long_recording(random_wav_factory):
+    model = BirdNET.load()
+    path = random_wav_factory(duration=150)
+    predictions = model.process_file(path)
+    assert isinstance(predictions, list)

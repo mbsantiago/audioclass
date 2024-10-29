@@ -110,6 +110,13 @@ def get_signature(callable: Callable) -> Signature:
     -------
     Signature
         The signature of the Perch model.
+
+    Raises
+    ------
+    ValueError
+        If the model does not have exactly one input tensor, if the input
+        tensor does not have 2 dimensions, or if the model does not have
+        exactly two output tensors.
     """
     function_type = callable.function_type
     parameters = function_type.parameters

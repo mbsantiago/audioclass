@@ -169,6 +169,11 @@ def get_signature(interpreter: Interpreter) -> Signature:
     -------
     Signature
         The signature of the BirdNET model.
+
+    Raises
+    ------
+    ValueError
+        If the model signature does not match the expected format.
     """
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()

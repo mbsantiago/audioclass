@@ -191,6 +191,12 @@ def batched(
     ------
     batch : np.ndarray
         The next batch of data from the array.
+
+    Raises
+    ------
+    ValueError
+        If n is less than 1 or if strict is True and the final batch is shorter
+        than n.
     """
     if n < 1:
         raise ValueError("n must be at least one")

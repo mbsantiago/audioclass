@@ -1,6 +1,8 @@
 import numpy as np
 import pytest
 
+pytest.importorskip("tflite_runtime")
+
 from audioclass.models.birdnet import BirdNET
 from audioclass.models.tflite import Interpreter, Signature, process_array
 

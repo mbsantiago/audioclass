@@ -5,6 +5,8 @@ import pytest
 import xarray as xr
 from soundevent import data
 
+pytest.importorskip("tensorflow")
+
 from audioclass.models.birdnet_analyzer import BirdNETAnalyzer
 
 

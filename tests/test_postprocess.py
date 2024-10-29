@@ -13,7 +13,7 @@ from audioclass.postprocess import (
 
 def test_fails_to_convert_to_tags_list_if_size_mismatch():
     class_probs = np.array([[0.5, 0.5]])
-    tags = [data.Tag(key="test", value="test")]
+    tags = [data.Tag(term=data.term_from_key("test"), value="test")]
 
     with pytest.raises(ValueError, match="(1 != 2)"):
         convert_to_predicted_tags_list(class_probs, tags)

@@ -5,6 +5,8 @@ import pytest
 import xarray as xr
 from soundevent import data
 
+pytest.importorskip("tflite_runtime")
+
 from audioclass.models.birdnet import BirdNET
 
 

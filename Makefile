@@ -53,7 +53,7 @@ test:    ## Run tests and generate coverage report.
 
 .PHONY: nox
 nox:
-	$(ENV_PREFIX)nox
+	$(ENV_PREFIX)nox --default-venv-backend uv -x
 
 .PHONY: nox-lint
 nox-lint:

@@ -8,7 +8,7 @@ import hashlib
 import os
 import tempfile
 from pathlib import Path
-from typing import Optional, Union
+from typing import Generator, Optional, Union
 from urllib.parse import urlparse
 
 import numpy as np
@@ -17,6 +17,7 @@ import requests
 __all__ = [
     "flat_sigmoid",
     "load_artifact",
+    "batched",
 ]
 
 
@@ -162,3 +163,50 @@ def flat_sigmoid(
         The output array with the same shape as the input.
     """
     return 1 / (1 + np.exp(-sensitivity * np.clip(x, vmin, vmax)))
+
+
+def batched(
+    array: np.ndarray,
+    n: int,
+    axis: int = 0,
+    *,
+    strict: bool = False,
+) -> Generator[np.ndarray, None, None]:
+    """Batch array data along an axis.
+
+    This function yields batches of data from an array along a specified axis.
+    The final batch may be shorter than the specified batch size if the array
+    length is not divisible by n.
+
+    Parameters
+    ----------
+    array
+        The input array.
+    n
+        The batch size.
+    strict
+        Whether to raise an error if the final batch is shorter than n.
+
+    Yields
+    ------
+    batch : np.ndarray
+        The next batch of data from the array.
+    """
+    if n < 1:
+        raise ValueError("n must be at least one")
+
+    shape = list(array.shape)
+    length = shape[axis]
+
+    for i in range(0, length, n):
+        s = tuple(
+            slice(None) if j != axis else slice(i, i + n)
+            for j in range(len(shape))
+        )
+
+        batch = array[s]
+
+        if strict and batch.shape[axis] < n:
+            raise ValueError("Final batch is shorter than n")
+
+        yield batch

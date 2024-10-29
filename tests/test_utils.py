@@ -1,9 +1,10 @@
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from audioclass.models.birdnet import LABELS_PATH, MODEL_PATH
-from audioclass.utils import _hash_url, _is_url, load_artifact
+from audioclass.utils import _hash_url, _is_url, batched, load_artifact
 
 
 def test_can_detect_birdnet_urls():
@@ -57,3 +58,34 @@ def test_loaded_artifact_is_stored_in_tempdir(
     assert path.exists()
     assert path.parent.parent == tempdir / "audioclass"
     assert path.parent.name == _hash_url(LABELS_PATH)
+
+
+def test_can_return_batches_of_arrays():
+    array = np.random.rand(12, 2)
+    batches = list(batched(array, 3))
+    assert len(batches) == 4
+    for batch in batches:
+        assert batch.shape == (3, 2)
+    assert (np.concatenate(batches) == array).all()
+
+
+def test_last_batch_is_returned_if_smaller_than_batch_size():
+    array = np.random.rand(12, 2)
+    batches = list(batched(array, 5))
+    assert len(batches) == 3
+    assert batches[-1].shape == (2, 2)
+    assert (np.concatenate(batches) == array).all()
+
+
+def test_fails_if_last_batch_is_small_and_strict():
+    array = np.random.rand(12, 2)
+    with pytest.raises(ValueError):
+        list(batched(array, 5, strict=True))
+
+
+def test_validates_batch_size():
+    array = np.random.rand(12, 2)
+    with pytest.raises(ValueError):
+        list(batched(array, 0))
+    with pytest.raises(ValueError):
+        list(batched(array, -1))

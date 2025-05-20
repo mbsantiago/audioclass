@@ -13,6 +13,7 @@ import tensorflow as tf
 from soundevent import data, terms
 
 from audioclass.constants import DATA_DIR, DEFAULT_THRESHOLD
+from audioclass.models.birdnet import LABELS_PATH
 from audioclass.models.tensorflow import Signature, TensorflowModel
 from audioclass.utils import load_artifact
 
@@ -30,9 +31,6 @@ This value corresponds to the sample rate used by the BirdNET model.
 """
 
 SAVED_MODEL_PATH = DATA_DIR / "BirdNET_GLOBAL_6K_V2.4"
-
-LABELS_PATH = "https://raw.githubusercontent.com/kahst/BirdNET-Analyzer/refs/heads/main/birdnet_analyzer/checkpoints/V2.4/BirdNET_GLOBAL_6K_V2.4_Labels.txt"
-"""Default path to the BirdNET labels file."""
 
 
 class BirdNETAnalyzer(TensorflowModel):

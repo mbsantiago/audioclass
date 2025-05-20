@@ -16,7 +16,7 @@ def test_load_artifact(tmp_path: Path):
     directory = tmp_path / "test"
     path = load_artifact(LABELS_PATH, directory=directory)
     assert path.exists()
-    assert path == directory / "BirdNET_GLOBAL_6K_V2.4_Labels.txt"
+    assert path == directory / "BirdNET_GLOBAL_6K_V2.4_Labels_en_uk.txt"
 
 
 def test_load_artifact_does_nothing_if_not_a_url(tmp_path: Path):
@@ -38,7 +38,7 @@ def test_load_artifact_does_not_download_if_file_exists(
 ):
     directory = tmp_path / "test"
     directory.mkdir()
-    path = directory / "BirdNET_GLOBAL_6K_V2.4_Labels.txt"
+    path = directory / "BirdNET_GLOBAL_6K_V2.4_Labels_en_uk.txt"
     path.touch()
 
     request_get = mocker.patch("requests.get")

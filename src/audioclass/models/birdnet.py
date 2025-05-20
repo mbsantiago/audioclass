@@ -54,10 +54,10 @@ SAMPLERATE = 48_000
 This value corresponds to the sample rate used by the BirdNET model.
 """
 
-MODEL_PATH: str = "https://github.com/kahst/BirdNET-Analyzer/raw/refs/heads/main/birdnet_analyzer/checkpoints/V2.4/BirdNET_GLOBAL_6K_V2.4_Model_FP32.tflite"
+MODEL_PATH: str = "https://github.com/birdnet-team/BirdNET-Analyzer/raw/refs/tags/v1.5.1/birdnet_analyzer/checkpoints/V2.4/BirdNET_GLOBAL_6K_V2.4_Model_FP32.tflite"
 """Default path to the BirdNET TensorFlow Lite model file."""
 
-LABELS_PATH = "https://raw.githubusercontent.com/kahst/BirdNET-Analyzer/refs/heads/main/birdnet_analyzer/checkpoints/V2.4/BirdNET_GLOBAL_6K_V2.4_Labels.txt"
+LABELS_PATH = "https://github.com/birdnet-team/BirdNET-Analyzer/raw/refs/tags/v2.0.0/birdnet_analyzer/labels/V2.4/BirdNET_GLOBAL_6K_V2.4_Labels_en_uk.txt"
 """Default path to the BirdNET labels file."""
 
 

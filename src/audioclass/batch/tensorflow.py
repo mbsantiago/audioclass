@@ -52,6 +52,7 @@ class TFDatasetIterator(BaseIterator):
                 name="load_recording",
                 num_parallel_calls=tf.data.AUTOTUNE,
             )
+            .ignore_errors()
             .enumerate()
             .flat_map(
                 lambda ind, arr: tfdata.Dataset.zip(

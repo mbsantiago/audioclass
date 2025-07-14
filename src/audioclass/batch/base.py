@@ -275,7 +275,10 @@ class BaseIterator(ABC):
         )
 
 
-def recordings_from_files(files: List[Path]) -> List[data.Recording]:
+def recordings_from_files(
+    files: List[Path],
+    ignore_errors: bool = True,
+) -> List[data.Recording]:
     """Create a list of `Recording` objects from a list of file paths.
 
     Parameters
@@ -288,9 +291,18 @@ def recordings_from_files(files: List[Path]) -> List[data.Recording]:
     List[data.Recording]
         A list of `Recording` objects corresponding to the input files.
     """
-    return [
-        data.Recording.from_file(file, compute_hash=False) for file in files
-    ]
+    recordings = []
+
+    for path in files:
+        try:
+            recording = data.Recording.from_file(path, compute_hash=False)
+            recordings.append(recording)
+        except Exception as e:
+            if not ignore_errors:
+                raise e
+            continue
+
+    return recordings
 
 
 def recordings_from_directory(

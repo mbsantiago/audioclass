@@ -43,6 +43,16 @@ def test_can_run_get_recordings_from_files(
     assert len(recordings) == len(file_list)
 
 
+def test_recordings_from_directory_skips_empty_files(
+    file_list: List[Path],
+    audio_dir: Path,
+):
+    (audio_dir / "empty_audio.wav").touch()
+
+    recordings = recordings_from_directory(audio_dir)
+    assert len(recordings) == len(file_list)
+
+
 def test_can_get_all_audio_files_in_dir(
     random_wav_factory,
     tmp_path: Path,

@@ -275,22 +275,48 @@ class BaseIterator(ABC):
         )
 
 
-def recordings_from_files(files: List[Path]) -> List[data.Recording]:
+def recordings_from_files(
+    files: List[Path],
+    ignore_errors: bool = True,
+) -> List[data.Recording]:
     """Create a list of `Recording` objects from a list of file paths.
+
+    This function iterates through a list of file paths, creating a
+    `soundevent.data.Recording` object for each file. It can optionally
+    ignore errors that occur during file processing.
 
     Parameters
     ----------
     files
-        A list of paths to audio files.
+        A list of `pathlib.Path` objects pointing to audio files.
+    ignore_errors
+        If True, any errors encountered while creating a `Recording` from a
+        file will be ignored, and the file will be skipped. If False, any
+        error will be raised. Defaults to True.
 
     Returns
     -------
     List[data.Recording]
-        A list of `Recording` objects corresponding to the input files.
+        A list of `Recording` objects created from the provided files.
+
+    Raises
+    ------
+    Exception
+        If `ignore_errors` is False and an error occurs while processing a
+        file.
     """
-    return [
-        data.Recording.from_file(file, compute_hash=False) for file in files
-    ]
+    recordings = []
+
+    for path in files:
+        try:
+            recording = data.Recording.from_file(path, compute_hash=False)
+            recordings.append(recording)
+        except Exception as e:
+            if not ignore_errors:
+                raise e
+            continue
+
+    return recordings
 
 
 def recordings_from_directory(

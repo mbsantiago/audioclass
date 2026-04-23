@@ -7,8 +7,9 @@ models.
 import hashlib
 import os
 import tempfile
+import time
 from pathlib import Path
-from typing import Generator, Optional, Union
+from typing import BinaryIO, Generator, Optional, Union
 from urllib.parse import urlparse
 
 import numpy as np
@@ -19,6 +20,10 @@ __all__ = [
     "load_artifact",
     "batched",
 ]
+
+DEFAULT_TIMEOUT: float = 30
+DEFAULT_RETRIES: int = 3
+DEFAULT_BACKOFF_FACTOR: float = 0.25
 
 
 def _hash_url(url: str) -> str:
@@ -70,13 +75,42 @@ def _is_url(path: str) -> bool:
     bool
         True if the path is a URL, False otherwise.
     """
-    return urlparse(path).scheme != ""
+    parsed = urlparse(path)
+    return parsed.scheme in {"http", "https"} and parsed.netloc != ""
+
+
+def _sha256_file(path: Path) -> str:
+    """Calculate the SHA256 hash of a file.
+
+    Parameters
+    ----------
+    path
+        The file to hash.
+
+    Returns
+    -------
+    str
+        The SHA256 digest in hexadecimal format.
+    """
+    digest = hashlib.sha256()
+
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            digest.update(chunk)
+
+    return digest.hexdigest()
 
 
 def load_artifact(
     path: Union[Path, str],
     directory: Optional[Path] = None,
     download: bool = True,
+    *,
+    timeout: float = DEFAULT_TIMEOUT,
+    retries: int = DEFAULT_RETRIES,
+    backoff_factor: float = DEFAULT_BACKOFF_FACTOR,
+    expected_sha256: Optional[str] = None,
+    expected_size: Optional[int] = None,
 ) -> Path:
     """Load an artifact from a local path or a URL.
 
@@ -93,6 +127,19 @@ def load_artifact(
     download
         Whether to download the artifact if it is not found in the cache.
         Defaults to True.
+    timeout
+        Timeout in seconds for each HTTP request. Defaults to 30.
+    retries
+        Maximum number of HTTP attempts for transient failures. Defaults to 3.
+    backoff_factor
+        Multiplier used to compute exponential backoff between retries.
+        Defaults to 0.25.
+    expected_sha256
+        Expected SHA256 checksum of the downloaded artifact. If provided,
+        mismatch raises ValueError.
+    expected_size
+        Expected file size in bytes of the downloaded artifact. If provided,
+        mismatch raises ValueError.
 
     Returns
     -------
@@ -118,7 +165,17 @@ def load_artifact(
     new_path = directory / basename
 
     if new_path.exists():
-        return new_path
+        try:
+            _validate_artifact(
+                new_path,
+                expected_sha256=expected_sha256,
+                expected_size=expected_size,
+            )
+            return new_path
+        except ValueError:
+            if not download:
+                raise
+            new_path.unlink()
 
     if not download:
         raise FileNotFoundError(
@@ -126,12 +183,92 @@ def load_artifact(
             f" and download is disabled."
         )
 
-    with new_path.open("wb") as f:
-        response = requests.get(path)
-        response.raise_for_status()
-        f.write(response.content)
+    try:
+        with new_path.open("wb") as f:
+            _download_with_retry(
+                path,
+                f,
+                timeout=timeout,
+                retries=retries,
+                backoff_factor=backoff_factor,
+            )
+    except Exception:
+        if new_path.exists():
+            new_path.unlink()
+        raise
+
+    try:
+        _validate_artifact(
+            new_path,
+            expected_sha256=expected_sha256,
+            expected_size=expected_size,
+        )
+    except ValueError:
+        if new_path.exists():
+            new_path.unlink()
+        raise
 
     return new_path
+
+
+def _download_with_retry(
+    url: str,
+    fileobj: BinaryIO,
+    timeout: float,
+    retries: int,
+    backoff_factor: float,
+) -> None:
+    if retries < 1:
+        raise ValueError("retries must be at least one")
+
+    if backoff_factor < 0:
+        raise ValueError("backoff_factor must be non-negative")
+
+    last_error: Optional[Exception] = None
+
+    for attempt in range(1, retries + 1):
+        try:
+            with requests.get(url, timeout=timeout, stream=True) as response:
+                response.raise_for_status()
+
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        fileobj.write(chunk)
+
+            return
+        except requests.RequestException as error:
+            last_error = error
+
+            if attempt == retries:
+                raise
+
+            delay = backoff_factor * (2 ** (attempt - 1))
+            time.sleep(delay)
+
+    if last_error is not None:  # pragma: no cover
+        raise last_error
+
+
+def _validate_artifact(
+    path: Path,
+    expected_sha256: Optional[str],
+    expected_size: Optional[int],
+) -> None:
+    if expected_size is not None:
+        size = path.stat().st_size
+        if size != expected_size:
+            raise ValueError(
+                f"Invalid file size for artifact at {path}"
+                f" ({size} != {expected_size})"
+            )
+
+    if expected_sha256 is not None:
+        digest = _sha256_file(path)
+        if digest.lower() != expected_sha256.lower():
+            raise ValueError(
+                f"Invalid SHA256 checksum for artifact at {path}"
+                f" ({digest} != {expected_sha256})"
+            )
 
 
 def flat_sigmoid(
@@ -142,9 +279,9 @@ def flat_sigmoid(
 ) -> np.ndarray:
     """Apply a flattened sigmoid function to an array.
 
-    This function applies a sigmoid function to each element of the input array,
-    but with a flattened shape to prevent extreme values. The output values are
-    clipped between 0 and 1.
+    This function applies a sigmoid function to each element of the
+    input array, but with a flattened shape to prevent extreme values.
+    The output values are clipped between 0 and 1.
 
     Parameters
     ----------

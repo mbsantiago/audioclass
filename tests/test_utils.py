@@ -12,6 +12,10 @@ def test_can_detect_birdnet_urls():
     assert _is_url(LABELS_PATH)
 
 
+def test_windows_like_paths_are_not_detected_as_urls():
+    assert not _is_url("C:\\Users\\name\\artifact.tflite")
+
+
 def test_load_artifact(tmp_path: Path):
     directory = tmp_path / "test"
     path = load_artifact(LABELS_PATH, directory=directory)
@@ -44,6 +48,128 @@ def test_load_artifact_does_not_download_if_file_exists(
     request_get = mocker.patch("requests.get")
     path = load_artifact(LABELS_PATH, directory=directory)
     request_get.assert_not_called()
+
+
+def test_load_artifact_uses_timeout_and_streaming(mocker, tmp_path: Path):
+    directory = tmp_path / "test"
+
+    response = mocker.MagicMock()
+    response.iter_content.return_value = [b"abc"]
+    response.raise_for_status.return_value = None
+    response.__enter__.return_value = response
+    request_get = mocker.patch("requests.get", return_value=response)
+
+    load_artifact(
+        LABELS_PATH,
+        directory=directory,
+        timeout=12,
+    )
+
+    request_get.assert_called_once_with(
+        LABELS_PATH,
+        timeout=12,
+        stream=True,
+    )
+
+
+def test_load_artifact_retries_on_failure(mocker, tmp_path: Path):
+    directory = tmp_path / "test"
+
+    response = mocker.MagicMock()
+    response.iter_content.return_value = [b"abc"]
+    response.raise_for_status.return_value = None
+    response.__enter__.return_value = response
+
+    from requests import RequestException
+
+    request_get = mocker.patch("requests.get", side_effect=[
+        RequestException("temporary failure"),
+        response,
+    ])
+
+    sleep = mocker.patch("time.sleep")
+    load_artifact(
+        LABELS_PATH,
+        directory=directory,
+        retries=2,
+        backoff_factor=0.5,
+    )
+
+    assert request_get.call_count == 2
+    sleep.assert_called_once_with(0.5)
+
+
+def test_load_artifact_fails_for_invalid_size(mocker, tmp_path: Path):
+    directory = tmp_path / "test"
+
+    response = mocker.MagicMock()
+    response.iter_content.return_value = [b"abc"]
+    response.raise_for_status.return_value = None
+    response.__enter__.return_value = response
+    mocker.patch("requests.get", return_value=response)
+
+    with pytest.raises(ValueError, match="Invalid file size"):
+        load_artifact(
+            LABELS_PATH,
+            directory=directory,
+            expected_size=4,
+        )
+
+
+def test_load_artifact_fails_for_invalid_checksum(mocker, tmp_path: Path):
+    directory = tmp_path / "test"
+
+    response = mocker.MagicMock()
+    response.iter_content.return_value = [b"abc"]
+    response.raise_for_status.return_value = None
+    response.__enter__.return_value = response
+    mocker.patch("requests.get", return_value=response)
+
+    with pytest.raises(ValueError, match="Invalid SHA256 checksum"):
+        load_artifact(
+            LABELS_PATH,
+            directory=directory,
+            expected_sha256="deadbeef",
+        )
+
+
+def test_load_artifact_removes_partial_file_on_download_error(
+    mocker,
+    tmp_path: Path,
+):
+    directory = tmp_path / "test"
+
+    response = mocker.MagicMock()
+    response.raise_for_status.return_value = None
+    response.__enter__.return_value = response
+
+    def broken_chunks(*args, **kwargs):
+        yield b"partial"
+        raise RuntimeError("stream broke")
+
+    response.iter_content.side_effect = broken_chunks
+    mocker.patch("requests.get", return_value=response)
+
+    with pytest.raises(RuntimeError, match="stream broke"):
+        load_artifact(LABELS_PATH, directory=directory, retries=1)
+
+    path = directory / "BirdNET_GLOBAL_6K_V2.4_Labels_en_uk.txt"
+    assert not path.exists()
+
+
+def test_load_artifact_validates_existing_cached_file(tmp_path: Path):
+    directory = tmp_path / "test"
+    directory.mkdir()
+    path = directory / "BirdNET_GLOBAL_6K_V2.4_Labels_en_uk.txt"
+    path.write_text("abc")
+
+    with pytest.raises(ValueError, match="Invalid file size"):
+        load_artifact(
+            LABELS_PATH,
+            directory=directory,
+            expected_size=4,
+            download=False,
+        )
 
 
 def test_loaded_artifact_is_stored_in_tempdir(
